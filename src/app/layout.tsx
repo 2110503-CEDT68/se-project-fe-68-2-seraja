@@ -27,10 +27,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${dmSans.variable}`}>
-      <body>
+    <html lang="en" className={`${cormorant.variable} ${dmSans.variable} h-full`}>
+      <body className="min-h-screen flex flex-col bg-[#f5f3ef]">
         <NextAuthProvider>
-          {children}
+          {/* We add 'flex-1' (which is flex-grow: 1) here.
+              If the gap persists, it's because the NextAuthProvider 
+              renders a <div> that isn't stretching. 
+          */}
+          <main className="flex-1 flex flex-col">
+            {children}
+          </main>
         </NextAuthProvider>
       </body>
     </html>

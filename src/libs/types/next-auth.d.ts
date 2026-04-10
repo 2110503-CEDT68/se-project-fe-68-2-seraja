@@ -7,7 +7,7 @@ declare module "next-auth" {
   interface Session {
     user: {
       /** The user's role from the backend API. */
-      role: "user" | "admin";
+      role: "user" | "admin" | "campOwner";
       /** The JWT token from the backend API. */
       token: string;
       /** The user's database ID. */
@@ -16,7 +16,7 @@ declare module "next-auth" {
   }
 
   interface User {
-    role: "user" | "admin";
+    role: "user" | "admin"| "campOwner";
     token: string;
     _id: string;
   }
@@ -25,7 +25,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   /** Returned by the `jwt` callback and `getToken`, when using JWT sessions */
   interface JWT {
-    role: "user" | "admin";
+    role: "user" | "admin"| "campOwner";
     token: string;
     _id: string;
   }

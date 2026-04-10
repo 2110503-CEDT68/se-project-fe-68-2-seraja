@@ -43,6 +43,8 @@ export const useAuth = () => {
     register,
     logout,
     loading: status === "loading",
-    isAdmin: session?.user?.role === 'admin'
+    isAdmin: session?.user?.role === 'admin',
+    // ADDED: Check for Camp Owner role
+    isCampOwner: session?.user?.role === 'campOwner'
   };
 };

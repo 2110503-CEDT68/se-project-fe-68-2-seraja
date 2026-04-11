@@ -7,7 +7,7 @@ interface NavbarProps {
   user?: {
     name?: string | null
     email?: string | null
-    role?: "user" | "admin"
+    role?: "user" | "admin" | "campOwner"
   } | null
   isAdmin?: boolean
   onLogout?: () => void

@@ -57,6 +57,8 @@ export default function BookingsPage() {
     error,
   } = useBookings();
 
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
   const [editSuccess, setEditSuccess] = useState(false);
   const [editError, setEditError] = useState("");
@@ -203,6 +205,15 @@ export default function BookingsPage() {
     }
   };
 
+  const STATUS_FILTERS = [
+    { key: "confirmed", label: "Confirmed", color: "bg-green-100 text-green-700 border-green-200 hover:bg-green-200" },
+    { key: "checked-in", label: "Checked In", color: "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200" },
+  ] as const;
+
+  const filteredBookings = statusFilter
+    ? bookings.filter((b) => b.status === statusFilter)
+    : bookings;
+  
   if (authLoading) {
     return (
       <>

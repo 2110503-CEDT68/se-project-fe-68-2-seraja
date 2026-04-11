@@ -8,19 +8,15 @@ export const useBookings = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const token = session?.user?.token;
 
   const getBookings = async () => {
-    if (status !== "authenticated" || !token) {
-      setError("Not authenticated");
-      return;
-    }
-    
     setLoading(true);
     setError(null);
     try {
       const data = await apiClient<{ data: Booking[] }>("/bookings", {}, token);
+      console.log("API response:", data);
       setBookings(data.data);
     } catch (err) {
       console.error(err);

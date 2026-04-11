@@ -40,6 +40,10 @@ const ROLE_CONFIG = {
 export default function BookingsPage() {
   const router = useRouter();
   const { user, logout, isAdmin, loading: authLoading } = useAuth();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const {
     bookings,
     getBookings,
@@ -276,8 +280,10 @@ export default function BookingsPage() {
               <p className="text-xs text-gray-500">Upcoming</p>
               <p className="text-2xl font-bold text-blue-600">
                 {
-                  bookings.filter((b) => new Date(b.checkInDate) >= new Date())
-                    .length
+                  bookings.filter(
+                    (b) =>
+                      new Date(b.checkInDate).setHours(0, 0, 0, 0) >= today.getTime()
+                  ).length
                 }
               </p>
             </div>
@@ -285,8 +291,10 @@ export default function BookingsPage() {
               <p className="text-xs text-gray-500">Past</p>
               <p className="text-2xl font-bold text-gray-400">
                 {
-                  bookings.filter((b) => new Date(b.checkInDate) < new Date())
-                    .length
+                  bookings.filter(
+                    (b) =>
+                      new Date(b.checkInDate).setHours(0, 0, 0, 0) < today.getTime()
+                  ).length
                 }
               </p>
             </div>

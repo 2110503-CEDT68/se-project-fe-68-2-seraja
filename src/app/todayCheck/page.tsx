@@ -60,22 +60,23 @@ export default function TodayCheckPage() {
 
   const checkedOutToday = useMemo(() => {
     return bookings.filter((b) => {
-      if (!b.checkOutDate) return false;
-      const bDate = new Date(b.checkOutDate).toISOString().split("T")[0];
-      return bDate === todayStr && b.status === "checked-out";
+      if (b.status !== "checked-out") return false;
+
+      // ถ้ามี actualCheckOut ให้ใช้วันจริงที่ checkout เป็นหลัก
+      if (b.actualCheckOut) {
+        const actualDate = new Date(b.actualCheckOut).toISOString().split("T")[0];
+        return actualDate === todayStr;
+      }
+
+      // fallback: ถ้าไม่มี actualCheckOut ให้ดูจาก checkOutDate เดิม
+      if (b.checkOutDate) {
+        const scheduledDate = new Date(b.checkOutDate).toISOString().split("T")[0];
+        return scheduledDate === todayStr;
+      }
+
+      return false;
     });
   }, [bookings, todayStr]);
-  
-  if (authLoading || (user && user.role !== "campOwner")) {
-    return (
-      <>
-        <Navbar user={user} isAdmin={isAdmin} onLogout={logout} />
-        <PageContainer>
-          <LoadingState message="Checking authorization..." />
-        </PageContainer>
-      </>
-    );
-  }
 
   return (
     <>

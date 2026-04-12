@@ -4,7 +4,6 @@ import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import PageContainer from "@/components/layout/PageContainer";
-import Button from "@/components/ui/Button";
 import ErrorState from "@/components/common/ErrorState";
 import LoadingState from "@/components/common/LoadingState";
 import { useBookings } from "@/libs/hooks/useBookings";
@@ -17,7 +16,6 @@ export default function TodayCheckPage() {
   const {
     bookings,
     getBookings,
-    checkInBooking,
     loading,
     error,
   } = useBookings();
@@ -52,32 +50,13 @@ export default function TodayCheckPage() {
     return `${year}-${month}-${day}`;
   }, [currentTime]);
 
-  const { pendingCheckIns, arrivedToday } = useMemo(() => {
-    const pendingCheckIns = bookings.filter((b) => {
+  const arrivedToday = useMemo(() => {
+    return bookings.filter((b) => {
       if (!b.checkInDate) return false;
       const bDate = new Date(b.checkInDate).toISOString().split("T")[0];
-      return bDate === todayStr && b.status === "confirmed";
-    });
-
-    const arrivedToday = bookings.filter((b) => {
-      if (!b.checkInDate) return false;
-      const bDate = new Date(b.checkInDate).toISOString().split("T")[0];
-      // Either checked-in today or has actualCheckIn today
       return bDate === todayStr && b.status === "checked-in";
     });
-
-    return { pendingCheckIns, arrivedToday };
   }, [bookings, todayStr]);
-
-  const handleCheckIn = async (bookingId: string) => {
-    if (!confirm("Confirm check-in for this guest?")) return;
-    try {
-      await checkInBooking(bookingId);
-      await getBookings();
-    } catch (err: any) {
-      alert(err.message || "Failed to check in.");
-    }
-  };
 
   if (authLoading || (user && user.role !== "campOwner")) {
     return (
@@ -100,7 +79,7 @@ export default function TodayCheckPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Arrivals Monitor</h1>
               <p className="text-gray-500 mt-1">
-                Track and manage guest check-ins for today.
+                View guest check-ins for today.
               </p>
             </div>
             <div className="text-right">
@@ -126,67 +105,12 @@ export default function TodayCheckPage() {
           <ErrorState message={error} onRetry={getBookings} />
         ) : (
           <div className="flex flex-col gap-12">
-            {/* ── Pending Check-ins Section ── */}
-            {/* 
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between border-b pb-2">
-                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                  <span className="flex h-3 w-3 rounded-full bg-amber-500 animate-pulse"></span>
-                  Pending Arrivals
-                  <span className="ml-2 text-sm font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                    {pendingCheckIns.length}
-                  </span>
-                </h2>
-              </div>
-
-              {loading ? (
-                <div className="py-8">
-                  <LoadingState message="Fetching data..." />
-                </div>
-              ) : pendingCheckIns.length === 0 ? (
-                <div className="rounded-xl border-2 border-dashed border-gray-200 p-8 text-center text-gray-500 bg-gray-50/50">
-                  No pending arrivals for today.
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {pendingCheckIns.map((booking) => (
-                    <div
-                      key={booking._id}
-                      className="group rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-bold text-gray-900 text-lg">
-                            {booking.guestName || booking.user?.name || "Guest"}
-                          </p>
-                          <p className="text-sm text-gray-500 mb-2">
-                            {booking.guestTel || booking.user?.tel || "No phone"}
-                          </p>
-                          <div className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                            {booking.campground?.name}
-                          </div>
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => handleCheckIn(booking._id)}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          Check In
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            */}
-
             {/* ── Already Arrived Section ── */}
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between border-b pb-2">
                 <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                   <span className="flex h-3 w-3 rounded-full bg-green-500"></span>
-                  Recently Checked-in
+                  Recently Checked-in Today
                   <span className="ml-2 text-sm font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                     {arrivedToday.length}
                   </span>

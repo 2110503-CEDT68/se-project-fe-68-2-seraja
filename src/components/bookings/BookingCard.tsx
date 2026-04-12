@@ -18,6 +18,7 @@ const STATUS_STYLES: Record<string, string> = {
   "checked-in": "bg-green-100 text-green-700",
   "checked-out": "bg-gray-200 text-gray-500",
   cancelled: "bg-red-100 text-red-600",
+  "late-checkout": "bg-orange-100 text-orange-700 border border-orange-300 font-bold animate-pulse",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -25,6 +26,7 @@ const STATUS_LABELS: Record<string, string> = {
   "checked-in": "Checked In",
   "checked-out": "Checked Out",
   cancelled: "Cancelled",
+  "late-checkout": "Late Checkout",
 };
 
 export default function BookingCard({
@@ -50,6 +52,15 @@ export default function BookingCard({
     actualCheckOut,
   } = booking;
 
+  const now = new Date();
+
+  const checkoutLimit = new Date(checkOutDate);
+  checkoutLimit.setHours(13, 0, 0, 0);
+
+  const isLateCheckout = (status === "checked-in" && now > checkoutLimit);
+
+  const displayStatus = (isLateCheckout ? "late-checkout" : status);
+
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("en-US", {
       year: "numeric",
@@ -69,14 +80,13 @@ export default function BookingCard({
   const isUpcoming = new Date(checkInDate) >= new Date();
   const isGuestBook = !!guestName;
 
-  const canEdit = !!onEdit && status === "confirmed" && isUpcoming;
-  const canCancel = !!onCancel && status === "confirmed";
-  const canCheckIn = !!onCheckIn && status === "confirmed";
-  const canCheckOut = !!onCheckOut && status === "checked-in";
-  const canDelete = !!onDelete;
-
-  const showActions =
-    canEdit || canCancel || canCheckIn || canCheckOut || canDelete;
+  const showActions = onEdit || onDelete || onCancel || onCheckIn || onCheckOut;
+  const canEdit = onEdit && status === "confirmed";
+  const canCancel = onCancel && status === "confirmed";
+  const canCheckIn = onCheckIn && status === "confirmed";
+  
+  const canCheckOut = onCheckOut && status === "checked-in";
+  const canDelete = onDelete && status === "cancelled";
 
   return (
     <Card className="p-5">
@@ -101,11 +111,11 @@ export default function BookingCard({
                 Registered user
               </span>
             )}
-            {status && (
+            {displayStatus && (
               <span
-                className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_STYLES[status] ?? "bg-gray-100 text-gray-500"}`}
+                className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_STYLES[displayStatus] ?? "bg-gray-100 text-gray-500"}`}
               >
-                {STATUS_LABELS[status] ?? status}
+                {STATUS_LABELS[displayStatus] ?? displayStatus}
               </span>
             )}
           </div>
@@ -224,7 +234,7 @@ export default function BookingCard({
                 fullWidth
                 onClick={() => onCheckOut!(_id)}
               >
-                Check Out
+                {isLateCheckout ? "Check Out (Late)" : "Check Out"}
               </Button>
             )}
             {canDelete && (

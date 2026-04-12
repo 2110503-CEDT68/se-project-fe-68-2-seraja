@@ -57,6 +57,7 @@ export default function BookingsPage() {
     error,
   } = useBookings();
 
+  const [timeframeFilter, setTimeframeFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
@@ -212,9 +213,28 @@ export default function BookingsPage() {
     { key: "cancelled", label: "Cancelled", color: "bg-red-100 text-red-600 border-red-200 hover:bg-red-200" },
   ] as const;
 
-  const filteredBookings = statusFilter
-    ? bookings.filter((b) => b.status === statusFilter)
-    : bookings;
+    
+  const timeframeFilteredBookings = bookings.filter((b) => {
+  if (!timeframeFilter) return true;
+  if (timeframeFilter === "today") {
+    return new Date(b.checkInDate).setHours(0, 0, 0, 0) === today.getTime() ||
+           new Date(b.checkOutDate).setHours(0, 0, 0, 0) === today.getTime();
+  }
+  if (timeframeFilter === "thisWeek") {
+    const checkIn = new Date(b.checkInDate).setHours(0, 0, 0, 0);
+    const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).setHours(0, 0, 0, 0);
+    return checkIn > today.getTime() && checkIn <= weekFromNow;
+  }
+  if (timeframeFilter === "later") {
+    const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).setHours(0, 0, 0, 0);
+    return new Date(b.checkInDate).setHours(0, 0, 0, 0) > weekFromNow;
+  }
+  return true;
+});
+
+const filteredBookings = statusFilter
+  ? timeframeFilteredBookings.filter((b) => b.status === statusFilter)
+  : timeframeFilteredBookings;
   
   if (authLoading) {
     return (
@@ -280,8 +300,64 @@ export default function BookingsPage() {
           </div>
         )}
 
-        {/* ── Stats ── */}
-        {!loading && bookings.length > 0 && (
+        {/* ── Timeframe Tabs (campOwner/admin only) ── */}
+        {(role === "campOwner" || role === "admin") && !loading && bookings.length > 0 && (
+          <div className="mb-6 flex gap-2 flex-wrap">
+            {[
+              { key: null, label: "All", color: "bg-gray-800 text-white border-gray-800" },
+              { key: "today", label: "Today", color: "bg-green-600 text-white border-green-600" },
+              { key: "thisWeek", label: "This Week", color: "bg-blue-600 text-white border-blue-600" },
+              { key: "later", label: "Later", color: "bg-gray-500 text-white border-gray-500" },
+            ].map((tf) => {
+              const isActive = timeframeFilter === tf.key;
+              const count = (() => {
+                if (tf.key === null) return bookings.length;
+                if (tf.key === "today") {
+                  return bookings.filter(
+                    (b) =>
+                      new Date(b.checkInDate).setHours(0, 0, 0, 0) === today.getTime() ||
+                      new Date(b.checkOutDate).setHours(0, 0, 0, 0) === today.getTime()
+                  ).length;
+                }
+                if (tf.key === "thisWeek") {
+                  const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).setHours(0, 0, 0, 0);
+                  return bookings.filter(
+                    (b) => {
+                      const checkIn = new Date(b.checkInDate).setHours(0, 0, 0, 0);
+                      return checkIn > today.getTime() && checkIn <= weekFromNow;
+                    }
+                  ).length;
+                }
+                const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).setHours(0, 0, 0, 0);
+                return bookings.filter(
+                  (b) => new Date(b.checkInDate).setHours(0, 0, 0, 0) > weekFromNow
+                ).length;
+              })();
+
+              return (
+                <button
+                  key={tf.key ?? "all"}
+                  onClick={() => {
+                    setTimeframeFilter(isActive ? null : tf.key);
+                    setStatusFilter(null);
+                  }}
+                  className={`
+                    text-sm font-semibold px-4 py-2 rounded-full border transition-colors
+                    ${isActive
+                      ? tf.color
+                      : "bg-white text-gray-600 border-gray-200 hover:bg-gray-100"}
+                  `}
+                >
+                  {tf.label}
+                  <span className="ml-2 text-xs opacity-80">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ── Stats (regular users only) ── */}
+        {role === "user" && !loading && bookings.length > 0 && (
           <div className="mb-6 flex gap-4 flex-wrap">
             <div className="rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
               <p className="text-xs text-gray-500">Total</p>
@@ -311,67 +387,61 @@ export default function BookingsPage() {
                 }
               </p>
             </div>
-            {(role === "campOwner" || role === "admin") && (
-              <div className="rounded-xl border border-purple-100 bg-white px-4 py-3 shadow-sm">
-                <p className="text-xs text-gray-500">Guest bookings</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {bookings.filter((b) => b.guestName).length}
-                </p>
-              </div>
-            )}
           </div>
         )}
-        {/* ── Status Filter Bar ── */}
-          {!loading && bookings.length > 0 && (
-            <div className="mb-6 flex items-center gap-2 flex-wrap">
+        {/* ── Status Filter Bar (all roles) ── */}
+        {!loading && bookings.length > 0 && (
+          <div className="mb-6 flex items-center gap-2 flex-wrap">
+            {/* All */}
+            <button
+              onClick={() => setStatusFilter(null)}
+              className={`
+                text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors
+                ${statusFilter === null
+                  ? "bg-gray-800 text-white border-gray-800"
+                  : "bg-white text-gray-600 border-gray-200 hover:bg-gray-100"}
+              `}
+            >
+              All
+              <span className="ml-1.5 opacity-70">
+                {timeframeFilteredBookings.length}
+              </span>
+            </button>
 
-              {/* All */}
-              <button
-                onClick={() => setStatusFilter(null)}
-                className={`
-                  text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors
-                  ${statusFilter === null
-                    ? "bg-gray-800 text-white border-gray-800"
-                    : "bg-white text-gray-600 border-gray-200 hover:bg-gray-100"}
-                `}
-              >
-                All
-                <span className="ml-1.5 opacity-70">{bookings.length}</span>
-              </button>
-
-              {/* Confirmed, Checked-in, Checked-out & Cancelled */}
-              {STATUS_FILTERS.map(({ key, label, color }) => {
-                const count = bookings.filter((b) => b.status === key).length;
-                const isActive = statusFilter === key;
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setStatusFilter(isActive ? null : key)}
-                    className={`
-                      text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors
-                      ${isActive
-                        ? color.replace("hover:", "") + " ring-2 ring-offset-1 ring-current"
-                        : `bg-white text-gray-500 border-gray-200 hover:${color.split(" ")[0].replace("bg-", "bg-")}`}
-                    `}
-                  >
-                    {label}
-                    <span className="ml-1.5 opacity-70">{count}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+            {/* Confirmed, Checked-in, Checked-out & Cancelled */}
+            {STATUS_FILTERS.map(({ key, label, color }) => {
+              const count = timeframeFilteredBookings.filter((b) => b.status === key).length;
+              const isActive = statusFilter === key;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setStatusFilter(isActive ? null : key)}
+                  className={`
+                    text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors
+                    ${isActive
+                      ? color.replace("hover:", "") + " ring-2 ring-offset-1 ring-current"
+                      : `bg-white text-gray-500 border-gray-200 hover:${color.split(" ")[0].replace("bg-", "bg-")}`}
+                  `}
+                >
+                  {label}
+                  <span className="ml-1.5 opacity-70">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
         {/* ── Booking list ── */}
         {error ? (
           <ErrorState message={error} onRetry={getBookings} />
         ) : (
           <BookingList
-            bookings={filteredBookings} 
+            bookings={filteredBookings}
             loading={loading}
             onEdit={role !== "campOwner" ? handleEdit : undefined}
             onCancel={handleCancel}
             onCheckIn={role === "campOwner" ? handleCheckIn : undefined}
             onCheckOut={role === "campOwner" ? handleCheckOut : undefined}
+            highlightToday={role === "campOwner" || role === "admin"}
           />
         )}
       </PageContainer>

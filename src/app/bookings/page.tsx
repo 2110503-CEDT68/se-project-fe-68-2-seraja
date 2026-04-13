@@ -59,6 +59,8 @@ export default function BookingsPage() {
 
   const [timeframeFilter, setTimeframeFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
 
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
   const [editSuccess, setEditSuccess] = useState(false);
@@ -434,15 +436,54 @@ const filteredBookings = statusFilter
         {error ? (
           <ErrorState message={error} onRetry={getBookings} />
         ) : (
-          <BookingList
-            bookings={filteredBookings}
-            loading={loading}
-            onEdit={role !== "campOwner" ? handleEdit : undefined}
-            onCancel={handleCancel}
-            onCheckIn={role === "campOwner" ? handleCheckIn : undefined}
-            onCheckOut={role === "campOwner" ? handleCheckOut : undefined}
-            highlightToday={role === "campOwner" || role === "admin"}
-          />
+          <>
+            <BookingList
+              bookings={filteredBookings.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)}
+              loading={loading}
+              onEdit={role !== "campOwner" ? handleEdit : undefined}
+              onCancel={handleCancel}
+              onCheckIn={role === "campOwner" ? handleCheckIn : undefined}
+              onCheckOut={role === "campOwner" ? handleCheckOut : undefined}
+              highlightToday={role === "campOwner" || role === "admin"}
+            />
+
+            {/* Pagination UI */}
+            {!loading && filteredBookings.length > ITEMS_PER_PAGE && (
+              <div className="flex items-center justify-center gap-2 mt-8 mb-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                >
+                  Previous
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.ceil(filteredBookings.length / ITEMS_PER_PAGE) }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentPage(i + 1)}
+                      className={`w-8 h-8 rounded-md text-sm font-medium transition-colors ${
+                        currentPage === i + 1
+                          ? "bg-blue-600 text-white"
+                          : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === Math.ceil(filteredBookings.length / ITEMS_PER_PAGE)}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </PageContainer>
 

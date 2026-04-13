@@ -35,6 +35,11 @@ export default function Navbar({
             <Link href="/bookings" className="text-sm font-medium text-gray-600 transition hover:text-blue-600">
               Bookings
             </Link>
+            {user?.role === "campOwner" && (
+              <Link href="/todayCheck" className="text-sm font-medium text-blue-600 font-bold transition hover:text-blue-700">
+                Monitor
+              </Link>
+            )}
           </div>
         </div>
 
@@ -43,7 +48,7 @@ export default function Navbar({
             <>
               <div className="hidden text-right sm:block">
                 <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-                <p className="text-xs text-gray-500">{isAdmin ? "Admin" : "User"}</p>
+                <p className="text-xs text-gray-500 capitalize">{user.role || "User"}</p>
               </div>
               <Button variant="outline" onClick={onLogout}>Logout</Button>
             </>

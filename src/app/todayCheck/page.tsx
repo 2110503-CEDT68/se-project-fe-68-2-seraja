@@ -112,6 +112,13 @@ export default function TodayCheckPage() {
     return null; 
   }
 
+  const formatDate = (dateString: Date | string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  };
+
   return (
     <>
       <Navbar user={user} isAdmin={isAdmin} onLogout={logout} />
@@ -161,22 +168,35 @@ export default function TodayCheckPage() {
                 {loading ? (
                   <div className="py-8"><LoadingState message="Fetching data..." /></div>
                 ) : expectedToday.length === 0 ? (
-                  <div className="rounded-xl border-2 border-dashed border-gray-200 p-8 text-center text-gray-500 h-full flex items-center justify-center">
+                  <div className="rounded-xl border-2 border-dashed border-gray-200 p-8 text-center text-gray-500 h-full flex items-center justify-center min-h-[150px]">
                     No more arrivals expected.
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {expectedToday.map((booking) => (
-                      <div key={booking._id} className="group rounded-xl border border-blue-100 bg-white p-4 shadow-sm transition hover:shadow-md">
+                      <div key={booking._id} className="group rounded-xl border border-blue-100 bg-white p-5 shadow-sm transition hover:shadow-md flex flex-col justify-between h-full">
                         <div className="flex flex-col gap-3">
+                          {/*Header*/}
+                          <div className="border-b border-gray-100 pb-3">
+                            <h3 className="font-semibold text-gray-800 text-sm line-clamp-1 mb-1">
+                              ⛺ {booking.campground?.name || "Unknown Camp"}
+                            </h3>
+                            <p className="text-xs text-gray-500 bg-gray-50 p-1.5 rounded-md inline-block w-full text-center">
+                              {formatDate(booking.checkInDate)} - {formatDate(booking.checkOutDate)}
+                            </p>
+                          </div>
+                          {/*Body*/}
                           <div>
                             <p className="font-bold text-gray-900 text-lg line-clamp-1">
                               {booking.guestName || booking.user?.name || "Guest"}
                             </p>
-                            <p className="text-xs text-gray-500">
-                              {booking.guestTel || booking.user?.tel || "No phone"}
+                            <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                              📞 {booking.guestTel || booking.user?.tel || "No phone"}
                             </p>
                           </div>
+                        </div>
+                        {/*Footer*/}
+                        <div className="mt-4 pt-2">
                           <Button 
                             size="sm" 
                             fullWidth 
@@ -204,28 +224,46 @@ export default function TodayCheckPage() {
                 </div>
 
                 {checkedOutToday.length === 0 ? (
-                  <div className="rounded-xl border-2 border-dashed border-gray-200 p-8 text-center text-gray-500 h-full flex items-center justify-center">
+                  <div className="rounded-xl border-2 border-dashed border-gray-200 p-8 text-center text-gray-500 h-full flex items-center justify-center min-h-[150px]">
                     No guests have checked out yet today.
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {checkedOutToday.map((booking) => (
-                      <div key={booking._id} className="group rounded-xl border border-gray-100 bg-gray-50/50 p-4 shadow-sm">
-                        <div className="flex justify-between items-center h-full">
-                          <div>
-                            <p className="font-bold text-gray-700 text-lg line-clamp-1">
-                              {booking.guestName || booking.user?.name || "Guest"}
+                      <div key={booking._id} className="group rounded-xl border border-gray-100 bg-gray-50/50 p-5 shadow-sm">
+                        <div className="flex flex-col gap-3 h-full justify-between">
+                          
+                          {/*Header*/}
+                          <div className="border-b border-gray-100 pb-3">
+                            <h3 className="font-semibold text-gray-800 text-sm line-clamp-1 mb-1">
+                              ⛺ {booking.campground?.name || "Unknown Camp"}
+                            </h3>
+                            <p className="text-xs text-gray-500 bg-gray-100 p-1.5 rounded-md inline-block w-full text-center">
+                              {formatDate(booking.checkInDate)} - {formatDate(booking.checkOutDate)}
                             </p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <div className="inline-flex items-center rounded-md bg-orange-50 px-2 py-0.5 text-[10px] font-medium text-orange-700 ring-1 ring-inset ring-orange-700/10">
-                                Departed
-                              </div>
-                              <span className="text-[10px] text-gray-400">
-                                {booking.actualCheckOut ? new Date(booking.actualCheckOut).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""}
-                              </span>
-                            </div>
                           </div>
-                          <div className="text-orange-400 text-xl font-bold">✓</div>
+
+                          {/*Body & Status*/}
+                          <div className="flex justify-between items-end mt-2">
+                            <div>
+                              <p className="font-bold text-gray-700 text-lg line-clamp-1">
+                                {booking.guestName || booking.user?.name || "Guest"}
+                              </p>
+                              <p className="text-xs text-gray-400 mb-2">
+                                📞 {booking.guestTel || booking.user?.tel || "No phone"}
+                              </p>
+                              
+                              <div className="flex items-center gap-2">
+                                <div className="inline-flex items-center rounded-md bg-orange-50 px-2 py-0.5 text-[10px] font-medium text-orange-700 ring-1 ring-inset ring-orange-700/10">
+                                  Departed
+                                </div>
+                                <span className="text-[10px] text-gray-400">
+                                  {booking.actualCheckOut ? new Date(booking.actualCheckOut).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="text-orange-400 text-2xl font-bold">✓</div>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -234,6 +272,7 @@ export default function TodayCheckPage() {
               </div>
 
             </div> 
+
             <div className="flex flex-col gap-4 mt-4">
               <div className="flex items-center justify-between border-b pb-2">
                 <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -246,28 +285,46 @@ export default function TodayCheckPage() {
               </div>
 
               {arrivedToday.length === 0 ? (
-                <div className="rounded-xl border-2 border-dashed border-gray-200 p-8 text-center text-gray-500">
+                <div className="rounded-xl border-2 border-dashed border-gray-200 p-8 text-center text-gray-500 min-h-[150px] flex items-center justify-center">
                   No guests have checked in yet today.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {arrivedToday.map((booking) => (
-                    <div key={booking._id} className="group rounded-xl border border-gray-100 bg-green-50/30 p-4 shadow-sm">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-bold text-gray-800 text-lg line-clamp-1">
-                            {booking.guestName || booking.user?.name || "Guest"}
+                    <div key={booking._id} className="group rounded-xl border border-gray-100 bg-green-50/30 p-5 shadow-sm">
+                      <div className="flex flex-col gap-3 h-full justify-between">
+                        
+                        {/*Header*/}
+                        <div className="border-b border-gray-100 pb-3">
+                          <h3 className="font-semibold text-gray-800 text-sm line-clamp-1 mb-1">
+                            ⛺ {booking.campground?.name || "Unknown Camp"}
+                          </h3>
+                          <p className="text-xs text-gray-500 bg-green-50 p-1.5 rounded-md inline-block w-full text-center">
+                            {formatDate(booking.checkInDate)} - {formatDate(booking.checkOutDate)}
                           </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <div className="inline-flex items-center rounded-md bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-800 ring-1 ring-inset ring-green-700/20">
-                              Arrived
-                            </div>
-                            <span className="text-[10px] text-gray-500">
-                              {booking.actualCheckIn ? new Date(booking.actualCheckIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
-                            </span>
-                          </div>
                         </div>
-                        <div className="text-green-500 text-2xl font-bold">✓</div>
+
+                        {/*Body & Status*/}
+                        <div className="flex justify-between items-end mt-2">
+                          <div>
+                            <p className="font-bold text-gray-800 text-lg line-clamp-1">
+                              {booking.guestName || booking.user?.name || "Guest"}
+                            </p>
+                            <p className="text-xs text-gray-400 mb-2">
+                              📞 {booking.guestTel || booking.user?.tel || "No phone"}
+                            </p>
+                            
+                            <div className="flex items-center gap-2">
+                              <div className="inline-flex items-center rounded-md bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-800 ring-1 ring-inset ring-green-700/20">
+                                Arrived
+                              </div>
+                              <span className="text-[10px] text-gray-500">
+                                {booking.actualCheckIn ? new Date(booking.actualCheckIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-green-500 text-2xl font-bold">✓</div>
+                        </div>
                       </div>
                     </div>
                   ))}

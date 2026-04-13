@@ -11,7 +11,7 @@ import { useAuth } from "@/libs/hooks/useAuth";
 import { Booking } from "@/types";
 import Button from "@/components/ui/Button";
 
-const ITEMS_PER_PAGE = 2;
+const ITEMS_PER_PAGE = 6;
 
 export default function TodayCheckPage() {
   const router = useRouter();

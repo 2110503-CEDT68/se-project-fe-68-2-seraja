@@ -1,8 +1,7 @@
 import { ApiError } from "./ApiError";
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "https://cedt-be-for-fe-proj.vercel.app/api/v1";
+  process.env.NEXT_PUBLIC_API_URL;
 
 export async function apiClient<T = unknown>(
   endpoint: string,

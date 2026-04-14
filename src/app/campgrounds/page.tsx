@@ -205,7 +205,7 @@ export default function CampgroundsPage() {
                 />
                 {/* Star rating below each card */}
                 <div className="mt-2 flex items-center justify-between rounded-b-xl border border-t-0 border-gray-100 bg-white px-4 py-2 shadow-sm">
-                  <span className="text-xs text-gray-500">Your rating:</span>
+                  <span className="text-xs text-gray-500">Your rating test:</span>
                   <StarRating
                     value={ratings.get(camp._id) ?? 0}
                     onChange={(v) =>

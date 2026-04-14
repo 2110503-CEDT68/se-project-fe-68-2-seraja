@@ -48,7 +48,8 @@ export default function CampgroundCard({
         }}
       >
         <Image
-          src={picture || "/img/campground-placeholder.jpg"}
+          // src={picture || "/img/campground-placeholder.jpg"}
+          src={"/img/campImg.jpg"}
           alt={name}
           fill
           className="object-cover"

@@ -47,6 +47,7 @@ next-env.d.ts
 
 # Claude
 CLAUDE.md
+.claude/
 
 # OS
 .DS_Store

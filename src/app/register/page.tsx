@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
@@ -16,19 +16,34 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // 👉 state สำหรับ popup
+  // 👉 popup state
   const [showPolicy, setShowPolicy] = useState(false);
   const [pendingData, setPendingData] = useState<RegisterData | null>(null);
-  const [accepted, setAccepted] = useState(false);
 
-  // 👉 กด submit → เปิด popup ก่อน
+  // 👉 scroll state
+  const [scrolledToBottom, setScrolledToBottom] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const isBottom =
+      el.scrollHeight - el.scrollTop <= el.clientHeight + 5;
+
+    if (isBottom) {
+      setScrolledToBottom(true);
+    }
+  };
+
+  // 👉 submit → เปิด policy
   const handleRegister = async (data: RegisterData) => {
-  setPendingData(data);
-  setAccepted(false); // reset ทุกครั้ง
-  setShowPolicy(true);
-};
+    setPendingData(data);
+    setScrolledToBottom(false); // reset ทุกครั้ง
+    setShowPolicy(true);
+  };
 
-  // 👉 กดยอมรับ policy → สมัครจริง
+  // 👉 confirm → สมัครจริง
   const confirmRegister = async () => {
     if (!pendingData) return;
 
@@ -77,61 +92,119 @@ export default function RegisterPage() {
         </div>
       </PageContainer>
 
-      {/* ✅ Popup Policy */}
-      {/* ✅ Popup Policy */}
-{showPolicy && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-    <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-      <h2 className="text-lg font-semibold text-gray-900">
-        Terms & Privacy Policy
-      </h2>
+      {/* ✅ Policy Modal */}
+      {showPolicy && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg">
+            <h2 className="text-lg font-semibold text-gray-900">
+              Terms & Privacy Policy
+            </h2>
 
-      <div className="mt-3 max-h-40 overflow-y-auto text-sm text-gray-600">
-        <p className="mb-2">
-          By creating an account, you agree to our Terms of Service and Privacy Policy.
-        </p>
-        <p>
-          Your personal data will be handled securely and used only for booking and account-related services.
-        </p>
-      </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Scroll to the bottom to accept
+            </p>
 
-      {/* ✅ Checkbox */}
-      <div className="mt-4 flex items-center gap-2">
-        <input
-          id="acceptPolicy"
-          type="checkbox"
-          checked={accepted}
-          onChange={(e) => setAccepted(e.target.checked)}
-          className="h-4 w-4"
-        />
-        <label htmlFor="acceptPolicy" className="text-sm text-gray-700">
-          I agree to the Terms & Privacy Policy
-        </label>
-      </div>
+            {/* ✅ Scroll Area */}
+            <div
+              ref={scrollRef}
+              onScroll={handleScroll}
+              className="mt-3 max-h-64 overflow-y-auto text-sm text-gray-600 border p-3 rounded space-y-3"
+            >
+              <p>
+                <strong>Privacy Policy & Terms of Service</strong><br />
+              </p>
 
-      <div className="mt-4 flex justify-end gap-2">
-        <button
-          onClick={() => setShowPolicy(false)}
-          className="rounded-md border px-4 py-2 text-sm hover:bg-gray-100"
-        >
-          Cancel
-        </button>
+              <p>
+                By creating an account and using our platform ("we", "our", "us"),
+                you agree to these Terms and Privacy Policy.
+              </p>
 
-        <button
-          onClick={confirmRegister}
-          disabled={!accepted}
-          className={`rounded-md px-4 py-2 text-sm text-white ${
-            accepted
-              ? "bg-blue-600 hover:bg-blue-700"
-              : "bg-gray-300 cursor-not-allowed"
-          }`}
-        >
-          Accept
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+              <p>
+                <strong>1. Information We Collect</strong><br />
+                We collect personal data such as your name, email, phone number,
+                and booking details. We also collect technical data like IP address,
+                device, and usage behavior.
+              </p>
+
+              <p>
+                <strong>2. How We Use Your Information</strong><br />
+                To process bookings, manage accounts, provide support, improve services,
+                and comply with legal obligations.
+              </p>
+
+              <p>
+                <strong>3. Data Retention</strong><br />
+                Booking data may be stored up to 5 years. Account data is kept while active.
+                Logs and analytics retained up to 12 months.
+              </p>
+
+              <p>
+                <strong>4. Data Sharing</strong><br />
+                We do not sell your data. We only share with service providers,
+                payment processors, and campground partners when necessary.
+              </p>
+
+              <p>
+                <strong>5. Cookies</strong><br />
+                Used to enhance experience and analyze traffic. You can control via browser.
+              </p>
+
+              <p>
+                <strong>6. Security</strong><br />
+                We use appropriate safeguards, but no system is 100% secure.
+              </p>
+
+              <p>
+                <strong>7. Your Rights</strong><br />
+                You may access, correct, or delete your data depending on your jurisdiction.
+              </p>
+
+              <p>
+                <strong>8. Liability</strong><br />
+                We are not responsible for indirect damages or third-party issues.
+              </p>
+
+              <p>
+                <strong>9. Updates</strong><br />
+                Continued use means acceptance of updated policies.
+              </p>
+
+              <p>
+                <strong>10. Contact</strong><br />
+                seraja@email.com
+              </p>
+
+              <p>
+                By scrolling and clicking Accept, you agree to these terms.
+              </p>
+
+              <div className="h-6" />
+            </div>
+
+            {/* ✅ Buttons */}
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={() => setShowPolicy(false)}
+                className="rounded-md border px-4 py-2 text-sm hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={confirmRegister}
+                disabled={!scrolledToBottom}
+                className={`rounded-md px-4 py-2 text-sm text-white ${
+                  scrolledToBottom
+                    ? "bg-blue-600 hover:bg-blue-700"
+                    : "bg-gray-300 cursor-not-allowed"
+                }`}
+              >
+                Accept
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

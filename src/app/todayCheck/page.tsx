@@ -206,8 +206,8 @@ export default function TodayCheckPage() {
         <div className="mb-8">
           <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Arrivals Monitor</h1>
-              <p className="text-gray-500 mt-1">Manage guest arrivals and departures for today.</p>
+              <p className="text-3xl text-gray-900 font-bold">Arrivals Monitor</p>
+              <p className="text-gray-500 font-sans mt-1">Manage guest arrivals and departures for today.</p>
             </div>
             <div className="text-right">
               <p className="text-sm font-medium text-blue-600">
@@ -240,13 +240,13 @@ export default function TodayCheckPage() {
               {/* Pending Arrival */}
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between border-b pb-2">
-                  <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <span className="flex h-3 w-3 rounded-full bg-blue-500"></span>
+                  <p className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <span className="flex h-3 w-3 rounded-full bg-blue-500 font-sans"></span>
                     Pending Arrival
-                    <span className="ml-2 text-sm font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                    <span className="ml-2 text-l font-sans text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                       {allExpectedToday.length}
                     </span>
-                  </h2>
+                  </p>
                 </div>
 
                 {allExpectedToday.length === 0 ? (
@@ -260,9 +260,9 @@ export default function TodayCheckPage() {
                         <div key={booking._id} className="group rounded-xl border border-blue-100 bg-white p-5 shadow-sm transition hover:shadow-md flex flex-col justify-between">
                           <div className="flex flex-col gap-3">
                             <div className="border-b border-gray-100 pb-3">
-                              <h3 className="font-semibold text-gray-800 text-sm line-clamp-1 mb-1">
+                              <p className="font-semibold text-gray-800 text-sm line-clamp-1 mb-1">
                                 ⛺ {booking.campground?.name || "Unknown Camp"}
-                              </h3>
+                              </p>
                               <p className="text-xs text-gray-500 bg-gray-50 p-1.5 rounded-md inline-block w-full text-center">
                                 {formatDate(booking.checkInDate)} - {formatDate(booking.checkOutDate)}
                               </p>
@@ -295,13 +295,13 @@ export default function TodayCheckPage() {
               {/* Pending Checkout */}
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between border-b pb-2">
-                  <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <span className="flex h-3 w-3 rounded-full bg-amber-400"></span>
+                  <p className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <span className="flex h-3 w-3 rounded-full bg-amber-400 font-sans"></span>
                     Upcoming Checkout
-                    <span className="ml-2 text-sm font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                    <span className="ml-2 text-l font-sans text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                       {allUpcomingCheckout.length}
                     </span>
-                  </h2>
+                  </p>
                 </div>
 
                 {allUpcomingCheckout.length === 0 ? (
@@ -315,9 +315,9 @@ export default function TodayCheckPage() {
                         <div key={booking._id} className="group rounded-xl border border-amber-100 bg-amber-50/40 p-5 shadow-sm transition hover:shadow-md flex flex-col justify-between">
                           <div className="flex flex-col gap-3">
                             <div className="border-b border-amber-100 pb-3">
-                              <h3 className="font-semibold text-gray-800 text-sm line-clamp-1 mb-1">
+                              <p className="font-semibold text-gray-800 text-sm line-clamp-1 mb-1">
                                 ⛺ {booking.campground?.name || "Unknown Camp"}
-                              </h3>
+                              </p>
                               <p className="text-xs text-gray-500 bg-amber-50 p-1.5 rounded-md inline-block w-full text-center">
                                 {formatDate(booking.checkInDate)} - {formatDate(booking.checkOutDate)}
                               </p>
@@ -351,13 +351,13 @@ export default function TodayCheckPage() {
             {/* Recently Checked-in Today */}
             <div className="flex flex-col gap-4 mt-4">
               <div className="flex items-center justify-between border-b pb-2">
-                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                  <span className="flex h-3 w-3 rounded-full bg-green-500"></span>
+                <p className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <span className="flex h-3 w-3 rounded-full bg-green-500 font-sans"></span>
                   Recently Checked-in Today
-                  <span className="ml-2 text-sm font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                  <span className="ml-2 text-l font-sans text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                     {allArrivedToday.length}
                   </span>
-                </h2>
+                </p>
               </div>
 
               {allArrivedToday.length === 0 ? (
@@ -371,7 +371,7 @@ export default function TodayCheckPage() {
                       <div key={booking._id} className="group rounded-xl border border-gray-100 bg-green-50/30 p-5 shadow-sm">
                         <div className="flex flex-col gap-3 h-full justify-between">
                           <div className="border-b border-gray-100 pb-3">
-                            <h3 className="font-semibold text-gray-800 text-sm line-clamp-1 mb-1">⛺ {booking.campground?.name || "Unknown Camp"}</h3>
+                            <p className="font-semibold text-gray-800 text-sm line-clamp-1 mb-1">⛺ {booking.campground?.name || "Unknown Camp"}</p>
                             <p className="text-xs text-gray-500 bg-green-50 p-1.5 rounded-md inline-block w-full text-center">
                               {formatDate(booking.checkInDate)} - {formatDate(booking.checkOutDate)}
                             </p>
@@ -404,13 +404,13 @@ export default function TodayCheckPage() {
             {/* Recently Checked-out Today */}
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between border-b pb-2">
-                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                  <span className="flex h-3 w-3 rounded-full bg-orange-400"></span>
+                <p className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <span className="flex h-3 w-3 rounded-full bg-orange-400 font-sans"></span>
                   Recently Checked-out Today
-                  <span className="ml-2 text-sm font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                  <span className="ml-2 text-l font-sans text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                     {allCheckedOutToday.length}
                   </span>
-                </h2>
+                </p>
               </div>
 
               {allCheckedOutToday.length === 0 ? (
@@ -424,7 +424,7 @@ export default function TodayCheckPage() {
                       <div key={booking._id} className="group rounded-xl border border-orange-100 bg-orange-50/30 p-5 shadow-sm">
                         <div className="flex flex-col gap-3 h-full justify-between">
                           <div className="border-b border-orange-100 pb-3">
-                            <h3 className="font-semibold text-gray-800 text-sm line-clamp-1 mb-1">⛺ {booking.campground?.name || "Unknown Camp"}</h3>
+                            <p className="font-semibold text-gray-800 text-sm line-clamp-1 mb-1">⛺ {booking.campground?.name || "Unknown Camp"}</p>
                             <p className="text-xs text-gray-500 bg-orange-50 p-1.5 rounded-md inline-block w-full text-center">
                               {formatDate(booking.checkInDate)} - {formatDate(booking.checkOutDate)}
                             </p>

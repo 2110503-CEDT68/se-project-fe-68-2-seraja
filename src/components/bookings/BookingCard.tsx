@@ -173,7 +173,7 @@ export default function BookingCard({
               Check-in
             </p>
             <p className="mt-1 text-sm font-semibold text-gray-900">
-              {formatDate(checkInDate)}
+              {formatDate(checkInDate)} - 12.00 PM
             </p>
           </div>
           <div className="rounded-lg bg-gray-50 p-3">
@@ -181,7 +181,7 @@ export default function BookingCard({
               Check-out
             </p>
             <p className="mt-1 text-sm font-semibold text-gray-900">
-              {formatDate(checkOutDate)}
+              {formatDate(checkOutDate)} - 1.00 PM
             </p>
           </div>
         </div>

@@ -108,8 +108,6 @@ export default function BookingsPage() {
           />
         )}
 
-        {role === "user" && hasBookings && <UserStatsPanel bookings={bookings} />}
-
         {hasBookings && (
           <StatusFilterBar
             timeframeFilteredBookings={filters.timeframeFilteredBookings}

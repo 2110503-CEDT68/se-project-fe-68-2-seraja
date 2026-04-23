@@ -30,6 +30,8 @@ export default function CampgroundsHeader({
           <option value="default">Default</option>
           <option value="name-az">Name: A → Z</option>
           <option value="name-za">Name: Z → A</option>
+          <option value="rating-low-high">Rating: Low → High</option>
+          <option value="rating-high-low">Rating: High → Low</option>
         </select>
       </div>
     </div>

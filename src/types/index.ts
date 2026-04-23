@@ -38,6 +38,7 @@ export interface Campground {
   owner: string; // Added from backend model
   __v?: number;
   id?: string;
+  averageRating?: number; // Added for sorting by rating
 }
 
 export interface Booking {

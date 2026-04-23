@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import PageContainer from "@/components/layout/PageContainer";
@@ -23,7 +23,9 @@ export default function CampgroundsPage() {
     getCampgrounds();
   }, [getCampgrounds]);
 
-  const sorted = sortCampgrounds(campgrounds, sort);
+  const sorted = useMemo(() => {
+    return sortCampgrounds(campgrounds, sort);
+  }, [campgrounds, sort]);
 
   const handleView = (id: string) => router.push(`/campgrounds/${id}`);
 

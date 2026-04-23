@@ -1,18 +1,11 @@
 import type { Metadata } from "next"
-import { Cormorant_Garamond, DM_Sans } from "next/font/google"
+import { DM_Sans } from "next/font/google"
 import "./globals.css"
 import NextAuthProvider from "@/providers/NextAuthProvider"
 
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  style: ["normal", "italic"],
-  variable: "--font-cormorant",
-})
-
 const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
+  weight: ["300", "400", "500", "700"],
   variable: "--font-dm-sans",
 })
 
@@ -27,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${dmSans.variable} h-full`}>
+    <html lang="en" className={`${dmSans.variable} h-full`}>
       <body className="min-h-screen flex flex-col bg-[#f5f3ef]">
         <NextAuthProvider>
           {/* We add 'flex-1' (which is flex-grow: 1) here.

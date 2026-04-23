@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { apiClient } from "../api/apiClient";
-import { Campground } from "../../types";
+import { Campground, Booking, ReviewResponse } from "../../types";
 
 // Tip: Keep this outside the hook so it's not recreated on every render
 const FEATURED_IMAGES: Record<string, string> = {
@@ -21,6 +21,8 @@ export const useCampgrounds = () => {
   const [singleCampground, setSingleCampground] = useState<Campground | null>(
     null,
   );
+  const [reviews, setReviews] = useState<Booking[]>([]);
+  const [averageRating, setAverageRating] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,11 +71,28 @@ export const useCampgrounds = () => {
     }
   }, []);
 
+  const getCampgroundReviews = useCallback(async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await apiClient<ReviewResponse>(`/campgrounds/${id}/reviews`);
+      setReviews(data.data);
+      setAverageRating(data.averageRating);
+    } catch {
+      setError("Failed to load campground reviews");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     campgrounds,
     singleCampground,
+    reviews,
+    averageRating,
     getCampgrounds,
     getCampgroundById,
+    getCampgroundReviews,
     loading,
     error,
   };

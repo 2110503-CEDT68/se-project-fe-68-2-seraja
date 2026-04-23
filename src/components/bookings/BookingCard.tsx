@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { Booking } from "@/types";
@@ -11,6 +12,7 @@ interface BookingCardProps {
   onCancel?: (bookingId: string) => void;
   onCheckIn?: (bookingId: string) => void;
   onCheckOut?: (bookingId: string) => void;
+  onReview?: (bookingId: string, rating: number, comment?: string) => Promise<void>;
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -18,6 +20,8 @@ const STATUS_STYLES: Record<string, string> = {
   "checked-in": "bg-green-100 text-green-700",
   "checked-out": "bg-gray-200 text-gray-500",
   cancelled: "bg-red-100 text-red-600",
+  reviewed: "bg-purple-100 text-purple-700",
+  "can-not-review": "bg-gray-300 text-gray-600",
   "late-checkout": "bg-orange-100 text-orange-700 border border-orange-300 font-bold animate-pulse",
 };
 
@@ -26,6 +30,8 @@ const STATUS_LABELS: Record<string, string> = {
   "checked-in": "Checked In",
   "checked-out": "Checked Out",
   cancelled: "Cancelled",
+  reviewed: "Reviewed",
+  "can-not-review": "Review Blocked",
   "late-checkout": "Late Checked Out",
 };
 
@@ -36,6 +42,7 @@ export default function BookingCard({
   onCancel,
   onCheckIn,
   onCheckOut,
+  onReview,
 }: BookingCardProps) {
   const {
     _id,
@@ -50,7 +57,13 @@ export default function BookingCard({
     status,
     actualCheckIn,
     actualCheckOut,
+    review_rating,
+    review_comment,
   } = booking;
+
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const now = new Date();
   let isOverdue = false;
@@ -66,7 +79,6 @@ export default function BookingCard({
       isLateCheckedOut = new Date(actualCheckOut) > checkoutLimit;
     }
   }
-  const displayStatus = isLateCheckedOut ? "late-checked-out" : status;
 
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("en-US", {
@@ -84,7 +96,6 @@ export default function BookingCard({
       minute: "2-digit",
     });
 
-  const isUpcoming = new Date(checkInDate) >= new Date();
   const isGuestBook = !!guestName;
 
   const showActions = onEdit || onDelete || onCancel || onCheckIn || onCheckOut;
@@ -93,6 +104,16 @@ export default function BookingCard({
   const canCheckIn = onCheckIn && status === "confirmed";
   const canCheckOut = onCheckOut && status === "checked-in";
   const canDelete = onDelete && status === "cancelled";
+
+  const handlePostReview = async () => {
+    if (!onReview || reviewRating === 0) return;
+    setIsSubmitting(true);
+    try {
+      await onReview(_id, reviewRating, reviewComment);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Card className="p-5">
@@ -219,6 +240,86 @@ export default function BookingCard({
             </p>
           )}
         </div>
+
+        {/* Review Section - Shows after checkout */}
+        {status === "checked-out" && onReview && (
+          <div className="mt-2 pt-4 border-t border-gray-100 transition-all duration-300">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <span className="text-base">⭐</span> Share your experience
+            </h3>
+
+            <div className="space-y-4">
+              <div className="flex gap-1.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewRating(star)}
+                    disabled={isSubmitting}
+                    className={`text-2xl transition-all duration-200 hover:scale-110 active:scale-95 ${
+                      star <= reviewRating
+                        ? "text-yellow-400"
+                        : "text-gray-200"
+                    }`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+
+              <div className="relative">
+                <textarea
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none text-sm transition-all min-h-[80px] resize-none"
+                  placeholder="Tell us what you liked about your stay..."
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <Button
+                size="sm"
+                fullWidth
+                disabled={reviewRating === 0 || isSubmitting}
+                onClick={handlePostReview}
+                className="shadow-sm shadow-blue-500/20"
+                loading={isSubmitting}
+              >
+                Post Review
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Existing Review - Shows when status is reviewed */}
+        {status === "reviewed" && (
+          <div className="mt-2 pt-4 border-t border-gray-100 transition-all duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <span className="text-base">⭐</span> Your Review
+              </h3>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+              <div className="flex gap-1 mb-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span
+                    key={star}
+                    className={`text-sm ${
+                      star <= (review_rating || 0)
+                        ? "text-yellow-400"
+                        : "text-gray-200"
+                    }`}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+              {review_comment && (
+                <p className="text-sm text-gray-700 italic">&quot;{review_comment}&quot;</p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Actions */}
         {showActions && (

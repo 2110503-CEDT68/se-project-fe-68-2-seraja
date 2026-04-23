@@ -35,6 +35,7 @@ export default function BookingsPage() {
     cancelBooking,
     checkInBooking,
     checkOutBooking,
+    createReview,
     exportBookingsCsv,
     loading,
     error,
@@ -45,6 +46,7 @@ export default function BookingsPage() {
     cancelBooking,
     checkInBooking,
     checkOutBooking,
+    createReview,
     refresh: getBookings,
   });
   const editModal = useEditBookingModal({
@@ -127,6 +129,7 @@ export default function BookingsPage() {
               onCancel={actions.handleCancel}
               onCheckIn={role === "campOwner" ? actions.handleCheckIn : undefined}
               onCheckOut={role === "campOwner" ? actions.handleCheckOut : undefined}
+              onReview={role === "user" ? actions.handleReview : undefined}
               highlightToday={isOwnerOrAdmin}
             />
 

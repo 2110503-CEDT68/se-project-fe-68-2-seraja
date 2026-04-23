@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import PageContainer from "@/components/layout/PageContainer";
 import CampgroundDetailCard from "@/components/campgrounds/CampgroundDetailCard";
+import ReviewList from "@/components/campgrounds/ReviewList";
 import BookingForm from "@/components/bookings/BookingForm";
 import BookingSuccessPanel from "@/components/bookings/BookingSuccessPanel";
 import Modal from "@/components/ui/Modal";
@@ -18,8 +19,15 @@ export default function CampgroundDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user, logout, isAdmin } = useAuth();
-  const { singleCampground, getCampgroundById, loading, error } =
-    useCampgrounds();
+  const { 
+    singleCampground, 
+    getCampgroundById, 
+    reviews,
+    averageRating,
+    getCampgroundReviews,
+    loading, 
+    error 
+  } = useCampgrounds();
   const {
     createBooking,
     loading: bookingLoading,
@@ -30,8 +38,11 @@ export default function CampgroundDetailPage() {
   const campgroundId = params?.id as string;
 
   useEffect(() => {
-    if (campgroundId) getCampgroundById(campgroundId);
-  }, [campgroundId, getCampgroundById]);
+    if (campgroundId) {
+      getCampgroundById(campgroundId);
+      getCampgroundReviews(campgroundId);
+    }
+  }, [campgroundId, getCampgroundById, getCampgroundReviews]);
 
   const handleBook = () => {
     if (!user) {
@@ -49,15 +60,26 @@ export default function CampgroundDetailPage() {
         {error ? (
           <ErrorState
             message={error}
-            onRetry={() => getCampgroundById(campgroundId)}
+            onRetry={() => {
+              getCampgroundById(campgroundId);
+              getCampgroundReviews(campgroundId);
+            }}
           />
         ) : (
-          <CampgroundDetailCard
-            campground={singleCampground}
-            loading={loading}
-            onBack={() => router.back()}
-            onBook={handleBook}
-          />
+          <>
+            <CampgroundDetailCard
+              campground={singleCampground}
+              loading={loading && !singleCampground}
+              onBack={() => router.back()}
+              onBook={handleBook}
+            />
+            
+            <ReviewList 
+              reviews={reviews}
+              averageRating={averageRating}
+              loading={loading && reviews.length === 0}
+            />
+          </>
         )}
       </PageContainer>
 

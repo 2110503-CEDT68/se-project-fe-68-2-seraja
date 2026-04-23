@@ -49,7 +49,13 @@ export interface Booking {
   // --- NEW FIELDS FOR THE TASK ---
   actualCheckIn?: string; // The time they actually arrived
   actualCheckOut?: string; // The time they actually left
-  status: "confirmed" | "checked-in" | "checked-out" | "cancelled"; // From backend enum
+  status:
+    | "confirmed"
+    | "checked-in"
+    | "checked-out"
+    | "cancelled"
+    | "reviewed"
+    | "can-not-review"; // From backend enum
   // --------------------------------
 
   nightsCount: number;
@@ -58,6 +64,19 @@ export interface Booking {
   guestTel?: string | null;
   campground: Campground;
   createdAt: string;
+
+  // Review fields
+  review_rating?: number | null;
+  review_comment?: string | null;
+  review_createdAt?: string;
+  review_isDeleted?: boolean;
+}
+
+export interface ReviewResponse {
+  success: boolean;
+  count: number;
+  averageRating: number;
+  data: Booking[];
 }
 
 export interface BookingInput {

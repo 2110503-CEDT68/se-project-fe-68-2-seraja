@@ -83,7 +83,7 @@ export default function ReviewList({
             </div>
             
             <div className="relative">
-              <span className="absolute -top-2 -left-1 text-4xl text-gray-100 font-serif">&quot;</span>
+              <span className="absolute -top-2 -left-1 text-4xl text-gray-100">&quot;</span>
               <p className="text-gray-700 text-sm leading-relaxed relative z-10 italic">
                 {review.review_comment || "No comment provided."}
               </p>

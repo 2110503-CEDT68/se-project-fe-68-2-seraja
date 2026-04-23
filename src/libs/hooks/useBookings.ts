@@ -162,6 +162,58 @@ export const useBookings = () => {
     }
   };
 
+  const createReview = async (
+    bookingId: string,
+    rating: number,
+    comment?: string,
+  ) => {
+    setError(null);
+    try {
+      return await apiClient(
+        `/bookings/${bookingId}/review`,
+        {
+          method: "PUT",
+          body: JSON.stringify({
+            review_rating: rating,
+            review_comment: comment,
+          }),
+        },
+        token,
+      );
+    } catch (err) {
+      setError(
+        err instanceof ApiError ? err.message : "Failed to create review",
+      );
+      throw err;
+    }
+  };
+
+  const updateReview = async (
+    bookingId: string,
+    rating: number,
+    comment?: string,
+  ) => {
+    setError(null);
+    try {
+      return await apiClient(
+        `/bookings/${bookingId}/review/update`,
+        {
+          method: "PUT",
+          body: JSON.stringify({
+            review_rating: rating,
+            review_comment: comment,
+          }),
+        },
+        token,
+      );
+    } catch (err) {
+      setError(
+        err instanceof ApiError ? err.message : "Failed to update review",
+      );
+      throw err;
+    }
+  };
+
   const exportBookingsCsv = async () => {
     try {
       const apiUrl =
@@ -196,6 +248,8 @@ export const useBookings = () => {
     cancelBooking,
     checkInBooking,
     checkOutBooking,
+    createReview,
+    updateReview,
     exportBookingsCsv,
     loading,
     error,

@@ -2,6 +2,7 @@ interface UseBookingActionsArgs {
   cancelBooking: (id: string) => Promise<unknown>;
   checkInBooking: (id: string) => Promise<unknown>;
   checkOutBooking: (id: string) => Promise<unknown>;
+  createReview?: (id: string, rating: number, comment?: string) => Promise<unknown>;
   refresh: () => Promise<void>;
 }
 
@@ -9,6 +10,7 @@ export function useBookingActions({
   cancelBooking,
   checkInBooking,
   checkOutBooking,
+  createReview,
   refresh,
 }: UseBookingActionsArgs) {
   const confirmAndRun = async (
@@ -44,5 +46,15 @@ export function useBookingActions({
         () => checkOutBooking(id),
         "Failed to check out.",
       ),
+    handleReview: async (id: string, rating: number, comment?: string) => {
+      if (!createReview) return;
+      try {
+        await createReview(id, rating, comment);
+        await refresh();
+      } catch (err) {
+        alert(err instanceof Error ? err.message : "Failed to post review.");
+        throw err;
+      }
+    },
   };
 }

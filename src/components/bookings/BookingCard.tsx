@@ -59,11 +59,14 @@ export default function BookingCard({
     actualCheckOut,
     review_rating,
     review_comment,
+    review_createdAt
   } = booking;
 
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState("");
+  const [reviewSuccess, setReviewSuccess] = useState(false);
 
   const now = new Date();
   let isOverdue = false;
@@ -106,10 +109,20 @@ export default function BookingCard({
   const canDelete = onDelete && status === "cancelled";
 
   const handlePostReview = async () => {
-    if (!onReview || reviewRating === 0) return;
+    if (reviewRating === 0) {
+      setReviewError("Please select a star rating before submitting.");
+      return;
+    }
+    
+    if (!onReview) return;
+    
+    setReviewError("");
     setIsSubmitting(true);
     try {
       await onReview(_id, reviewRating, reviewComment);
+      setReviewSuccess(true);
+    } catch (err) {
+      setReviewError(err instanceof Error ? err.message : "Failed to post review.");
     } finally {
       setIsSubmitting(false);
     }
@@ -244,78 +257,105 @@ export default function BookingCard({
         {/* Review Section - Shows after checkout */}
         {status === "checked-out" && onReview && (
           <div className="mt-2 pt-4 border-t border-gray-100 transition-all duration-300">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <span className="text-base">⭐</span> Share your experience
-            </h3>
-
-            <div className="space-y-4">
-              <div className="flex gap-1.5">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setReviewRating(star)}
-                    disabled={isSubmitting}
-                    className={`text-2xl transition-all duration-200 hover:scale-110 active:scale-95 ${
-                      star <= reviewRating
-                        ? "text-yellow-400"
-                        : "text-gray-200"
-                    }`}
-                  >
-                    ★
-                  </button>
-                ))}
+            {reviewSuccess ? (
+              <div className="bg-green-50 rounded-xl p-4 text-center border border-green-100 animate-in fade-in duration-300">
+                <div className="text-3xl text-green-500 mb-1">✓</div>
+                <p className="font-semibold text-green-800">Thank you for your review!</p>
+                <p className="text-xs text-green-600 mt-1">Your feedback helps other campers make informed decisions.</p>
               </div>
+            ) : (
+              <div className="bg-blue-50/40 rounded-xl p-4 border border-blue-100">
+                <h3 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                  Share your experience
+                </h3>
 
-              <div className="relative">
-                <textarea
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none text-sm transition-all min-h-[80px] resize-none"
-                  placeholder="Tell us what you liked about your stay..."
-                  value={reviewComment}
-                  onChange={(e) => setReviewComment(e.target.value)}
-                  disabled={isSubmitting}
-                />
+                <div className="space-y-4">
+                  <div className="flex gap-1.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => { setReviewRating(star); setReviewError(""); }}
+                        disabled={isSubmitting}
+                        className={`text-2xl transition-all duration-200 hover:scale-110 active:scale-95 ${
+                          star <= reviewRating
+                            ? "text-yellow-400 drop-shadow-sm"
+                            : "text-gray-300"
+                        }`}
+                      >
+                        ★
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="relative">
+                    <textarea
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none text-sm transition-all min-h-[80px] resize-none"
+                      placeholder="Tell us what you liked about your stay..."
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      disabled={isSubmitting}
+                    />
+                  </div>
+
+                  {/* ส่วนแสดง Error ตาม US2-1 */}
+                  {reviewError && (
+                    <p className="text-sm text-red-500 bg-red-50 p-2 rounded-lg border border-red-100 text-center">
+                      {reviewError}
+                    </p>
+                  )}
+
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      disabled={isSubmitting}
+                      onClick={handlePostReview}
+                      className="shadow-sm shadow-blue-500/20"
+                      loading={isSubmitting}
+                    >
+                      Submit Review
+                    </Button>
+                  </div>
+                </div>
               </div>
-
-              <Button
-                size="sm"
-                fullWidth
-                disabled={reviewRating === 0 || isSubmitting}
-                onClick={handlePostReview}
-                className="shadow-sm shadow-blue-500/20"
-                loading={isSubmitting}
-              >
-                Post Review
-              </Button>
-            </div>
+            )}
           </div>
         )}
 
         {/* Existing Review - Shows when status is reviewed */}
-        {status === "reviewed" && (
-          <div className="mt-2 pt-4 border-t border-gray-100 transition-all duration-300">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <span className="text-base">⭐</span> Your Review
-              </h3>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-              <div className="flex gap-1 mb-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <span
-                    key={star}
-                    className={`text-sm ${
-                      star <= (review_rating || 0)
-                        ? "text-yellow-400"
-                        : "text-gray-200"
-                    }`}
-                  >
-                    ★
+        {status === "reviewed" && !reviewSuccess && (
+          <div className="mt-4 pt-5 border-t border-gray-100 animate-in fade-in duration-500">
+            <h3 className="text-base font-bold text-gray-900 mb-3">
+              Your Review
+            </h3>
+            
+            <div className="bg-gray-50/80 rounded-xl p-4 border border-gray-100">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      className={`text-lg ${
+                        star <= (review_rating || 0)
+                          ? "text-yellow-400"
+                          : "text-gray-200"
+                      }`}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+                {review_createdAt && (
+                  <span className="text-xs text-gray-500 font-medium">
+                    {formatDate(review_createdAt)}
                   </span>
-                ))}
+                )}
               </div>
+              
               {review_comment && (
-                <p className="text-sm text-gray-700 italic">&quot;{review_comment}&quot;</p>
+                <p className="text-sm text-gray-700 italic">
+                  &quot;{review_comment}&quot;
+                </p>
               )}
             </div>
           </div>

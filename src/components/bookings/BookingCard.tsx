@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { Booking } from "@/types";
@@ -66,7 +66,18 @@ export default function BookingCard({
   const [reviewComment, setReviewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState("");
-  const [reviewSuccess, setReviewSuccess] = useState(false);
+
+  const [optStatus, setOptStatus] = useState(status);
+  const [optRating, setOptRating] = useState(review_rating);
+  const [optComment, setOptComment] = useState(review_comment);
+  const [optDate, setOptDate] = useState(review_createdAt);
+
+  useEffect(() => {
+    setOptStatus(status);
+    setOptRating(review_rating);
+    setOptComment(review_comment);
+    setOptDate(review_createdAt);
+  }, [status, review_rating, review_comment, review_createdAt]);
 
   const now = new Date();
   let isOverdue = false;
@@ -76,9 +87,9 @@ export default function BookingCard({
     const checkoutLimit = new Date(checkOutDate);
     checkoutLimit.setHours(13, 0, 0, 0);
 
-    isOverdue = status === "checked-in" && now > checkoutLimit;
+    isOverdue = optStatus === "checked-in" && now > checkoutLimit;
 
-    if (status === "checked-out" && actualCheckOut) {
+    if (actualCheckOut) {
       isLateCheckedOut = new Date(actualCheckOut) > checkoutLimit;
     }
   }
@@ -120,7 +131,12 @@ export default function BookingCard({
     setIsSubmitting(true);
     try {
       await onReview(_id, reviewRating, reviewComment);
-      setReviewSuccess(true);
+      
+      setOptStatus("reviewed");
+      setOptRating(reviewRating);
+      setOptComment(reviewComment);
+      setOptDate(new Date().toISOString());
+      
     } catch (err) {
       setReviewError(err instanceof Error ? err.message : "Failed to post review.");
     } finally {
@@ -151,11 +167,11 @@ export default function BookingCard({
                 Registered user
               </span>
             )}
-            {status && (
+            {optStatus && (
               <span
-                className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_STYLES[status] ?? "bg-gray-100 text-gray-500"}`}
+                className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_STYLES[optStatus] ?? "bg-gray-100 text-gray-500"}`}
               >
-                {STATUS_LABELS[status] ?? status}
+                {STATUS_LABELS[optStatus] ?? optStatus}
               </span>
             )}
 
@@ -254,76 +270,64 @@ export default function BookingCard({
           )}
         </div>
 
-        {/* Review Section - Shows after checkout */}
-        {status === "checked-out" && onReview && (
-          <div className="mt-2 pt-4 border-t border-gray-100 transition-all duration-300">
-            {reviewSuccess ? (
-              <div className="bg-green-50 rounded-xl p-4 text-center border border-green-100 animate-in fade-in duration-300">
-                <div className="text-3xl text-green-500 mb-1">✓</div>
-                <p className="font-semibold text-green-800">Thank you for your review!</p>
-                <p className="text-xs text-green-600 mt-1">Your feedback helps other campers make informed decisions.</p>
+        {optStatus === "checked-out" && onReview && (
+          <div className="mt-4 pt-5 border-t border-gray-100 transition-all duration-300">
+            <h3 className="text-base font-bold text-gray-900 mb-3">
+              Write a Review
+            </h3>
+
+            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <div className="flex gap-1 mb-4">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => { setReviewRating(star); setReviewError(""); }}
+                    disabled={isSubmitting}
+                    className={`text-2xl transition-all duration-200 hover:scale-110 active:scale-95 ${
+                      star <= reviewRating
+                        ? "text-yellow-400 drop-shadow-sm"
+                        : "text-gray-300"
+                    }`}
+                  >
+                    ★
+                  </button>
+                ))}
               </div>
-            ) : (
-              <div className="bg-blue-50/40 rounded-xl p-4 border border-blue-100">
-                <h3 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                  Share your experience
-                </h3>
 
-                <div className="space-y-4">
-                  <div className="flex gap-1.5">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => { setReviewRating(star); setReviewError(""); }}
-                        disabled={isSubmitting}
-                        className={`text-2xl transition-all duration-200 hover:scale-110 active:scale-95 ${
-                          star <= reviewRating
-                            ? "text-yellow-400 drop-shadow-sm"
-                            : "text-gray-300"
-                        }`}
-                      >
-                        ★
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="relative">
-                    <textarea
-                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none text-sm transition-all min-h-[80px] resize-none"
-                      placeholder="Tell us what you liked about your stay..."
-                      value={reviewComment}
-                      onChange={(e) => setReviewComment(e.target.value)}
-                      disabled={isSubmitting}
-                    />
-                  </div>
-
-                  {/* ส่วนแสดง Error ตาม US2-1 */}
-                  {reviewError && (
-                    <p className="text-sm text-red-500 bg-red-50 p-2 rounded-lg border border-red-100 text-center">
-                      {reviewError}
-                    </p>
-                  )}
-
-                  <div className="flex justify-end">
-                    <Button
-                      size="sm"
-                      disabled={isSubmitting}
-                      onClick={handlePostReview}
-                      className="shadow-sm shadow-blue-500/20"
-                      loading={isSubmitting}
-                    >
-                      Submit Review
-                    </Button>
-                  </div>
-                </div>
+              <div className="relative">
+                <textarea
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none text-sm transition-all min-h-[80px] resize-none"
+                  placeholder="Tell us what you liked about your stay... (Optional)"
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  disabled={isSubmitting}
+                />
               </div>
-            )}
+
+              {/*Error US2-1 */}
+              {reviewError && (
+                <p className="mt-2 text-sm text-red-500 bg-red-50 p-2 rounded-lg border border-red-100 text-center">
+                  {reviewError}
+                </p>
+              )}
+
+              <div className="mt-4 flex justify-end">
+                <Button
+                  size="sm"
+                  disabled={isSubmitting}
+                  onClick={handlePostReview}
+                  className="px-6 shadow-sm shadow-blue-500/20"
+                  loading={isSubmitting}
+                >
+                  Submit
+                </Button>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Existing Review - Shows when status is reviewed */}
-        {status === "reviewed" && !reviewSuccess && (
+        {optStatus === "reviewed" && (
           <div className="mt-4 pt-5 border-t border-gray-100 animate-in fade-in duration-500">
             <h3 className="text-base font-bold text-gray-900 mb-3">
               Your Review
@@ -336,7 +340,7 @@ export default function BookingCard({
                     <span
                       key={star}
                       className={`text-lg ${
-                        star <= (review_rating || 0)
+                        star <= (optRating || 0) 
                           ? "text-yellow-400"
                           : "text-gray-200"
                       }`}
@@ -345,16 +349,16 @@ export default function BookingCard({
                     </span>
                   ))}
                 </div>
-                {review_createdAt && (
+                {optDate && (
                   <span className="text-xs text-gray-500 font-medium">
-                    {formatDate(review_createdAt)}
+                    {formatDate(optDate)}
                   </span>
                 )}
               </div>
               
-              {review_comment && (
+              {optComment && ( 
                 <p className="text-sm text-gray-700 italic">
-                  &quot;{review_comment}&quot;
+                  &quot;{optComment}&quot;
                 </p>
               )}
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import PageContainer from "@/components/layout/PageContainer";
@@ -14,6 +14,8 @@ import { useCampgrounds } from "@/libs/hooks/useCampgrounds";
 import { useBookings } from "@/libs/hooks/useBookings";
 import { useBookingModal } from "@/libs/hooks/useBookingModal";
 import { useAuth } from "@/libs/hooks/useAuth";
+
+const REVIEWS_PER_PAGE = 6;
 
 export default function CampgroundDetailPage() {
   const params = useParams();
@@ -36,6 +38,20 @@ export default function CampgroundDetailPage() {
   const bookingModal = useBookingModal({ createBooking });
 
   const campgroundId = params?.id as string;
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 whenever the reviews array changes (e.g. new campground)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [reviews]);
+
+  const totalPages = Math.max(1, Math.ceil(reviews.length / REVIEWS_PER_PAGE));
+
+  const paginatedReviews = reviews.slice(
+    (currentPage - 1) * REVIEWS_PER_PAGE,
+    currentPage * REVIEWS_PER_PAGE
+  );
 
   useEffect(() => {
     if (campgroundId) {

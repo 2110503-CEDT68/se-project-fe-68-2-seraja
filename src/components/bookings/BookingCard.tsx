@@ -374,7 +374,7 @@ export default function BookingCard({
                       setOptStatus("checked-out");
                       setOptRating(null);
                       setOptComment(null);
-                      setOptDate(null);
+                      setOptDate(undefined);
                       setReviewRating(0);
                       setReviewComment("");
                       setReviewError("");

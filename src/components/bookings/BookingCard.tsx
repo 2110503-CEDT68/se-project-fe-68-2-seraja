@@ -369,7 +369,16 @@ export default function BookingCard({
                   <Button
                     variant="danger"
                     size="sm"
-                    onClick={() => onDeleteReview(_id)}
+                    onClick={async () => {
+                      await onDeleteReview(_id);
+                      setOptStatus("checked-out");
+                      setOptRating(null);
+                      setOptComment(null);
+                      setOptDate(null);
+                      setReviewRating(0);
+                      setReviewComment("");
+                      setReviewError("");
+                    }}
                   >
                     Delete Review
                   </Button>

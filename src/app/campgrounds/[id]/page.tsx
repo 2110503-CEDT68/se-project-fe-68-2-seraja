@@ -95,6 +95,44 @@ export default function CampgroundDetailPage() {
               averageRating={averageRating}
               loading={loading && reviews.length === 0}
             />
+            {!loading && totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-6 mb-10">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 rounded-md border text-sm font-medium
+                             disabled:opacity-40 disabled:cursor-not-allowed
+                             hover:bg-gray-100 transition-colors"
+                >
+                  ← Prev
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors
+                      ${
+                        page === currentPage
+                          ? "bg-green-600 text-white border-green-600"
+                          : "hover:bg-gray-100"
+                      }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 rounded-md border text-sm font-medium
+                             disabled:opacity-40 disabled:cursor-not-allowed
+                             hover:bg-gray-100 transition-colors"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
           </>
         )}
       </PageContainer>

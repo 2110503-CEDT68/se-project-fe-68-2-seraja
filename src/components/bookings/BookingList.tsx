@@ -14,6 +14,7 @@ interface BookingListProps {
   onCheckIn?: (bookingId: string) => void;
   onCheckOut?: (bookingId: string) => void;
   onReview?: (bookingId: string, rating: number, comment?: string) => Promise<void>;
+  onDeleteReview?: (bookingId: string) => Promise<void>;
   highlightToday?: boolean;
 }
 
@@ -26,6 +27,7 @@ export default function BookingList({
   onCheckIn,
   onCheckOut,
   onReview,
+  onDeleteReview,
   highlightToday = false,
 }: BookingListProps) {
   if (loading) {
@@ -84,6 +86,7 @@ export default function BookingList({
                 onCheckIn={onCheckIn}
                 onCheckOut={onCheckOut}
                 onReview={onReview}
+                onDeleteReview={onDeleteReview}
               />
             </div>
           </div>
@@ -97,6 +100,7 @@ export default function BookingList({
             onCheckIn={onCheckIn}
             onCheckOut={onCheckOut}
             onReview={onReview}
+            onDeleteReview={onDeleteReview}
           />
         );
       })}

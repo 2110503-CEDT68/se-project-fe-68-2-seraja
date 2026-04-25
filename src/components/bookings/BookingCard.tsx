@@ -13,6 +13,7 @@ interface BookingCardProps {
   onCheckIn?: (bookingId: string) => void;
   onCheckOut?: (bookingId: string) => void;
   onReview?: (bookingId: string, rating: number, comment?: string) => Promise<void>;
+  onDeleteReview?: (bookingId: string) => Promise<void>;
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -43,6 +44,7 @@ export default function BookingCard({
   onCheckIn,
   onCheckOut,
   onReview,
+  onDeleteReview,
 }: BookingCardProps) {
   const {
     _id,
@@ -332,7 +334,7 @@ export default function BookingCard({
             <h3 className="text-base font-bold text-gray-900 mb-3">
               Your Review
             </h3>
-            
+
             <div className="bg-gray-50/80 rounded-xl p-4 border border-gray-100">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex gap-1">
@@ -355,11 +357,32 @@ export default function BookingCard({
                   </span>
                 )}
               </div>
-              
+
               {optComment && ( 
                 <p className="text-sm text-gray-700 italic">
                   &quot;{optComment}&quot;
                 </p>
+              )}
+
+              {onDeleteReview && (
+                <div className="mt-3 flex justify-end">
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={async () => {
+                      await onDeleteReview(_id);
+                      setOptStatus("checked-out");
+                      setOptRating(null);
+                      setOptComment(null);
+                      setOptDate(undefined);
+                      setReviewRating(0);
+                      setReviewComment("");
+                      setReviewError("");
+                    }}
+                  >
+                    Delete Review
+                  </Button>
+                </div>
               )}
             </div>
           </div>

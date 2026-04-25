@@ -3,6 +3,7 @@ interface UseBookingActionsArgs {
   checkInBooking: (id: string) => Promise<unknown>;
   checkOutBooking: (id: string) => Promise<unknown>;
   createReview?: (id: string, rating: number, comment?: string) => Promise<unknown>;
+  deleteReview?: (id: string) => Promise<unknown>;
   refresh: () => Promise<void>;
 }
 
@@ -11,6 +12,7 @@ export function useBookingActions({
   checkInBooking,
   checkOutBooking,
   createReview,
+  deleteReview,
   refresh,
 }: UseBookingActionsArgs) {
   const confirmAndRun = async (
@@ -53,6 +55,17 @@ export function useBookingActions({
         await refresh();
       } catch (err) {
         alert(err instanceof Error ? err.message : "Failed to post review.");
+        throw err;
+      }
+    },
+    handleDeleteReview: async (id: string) => {
+      if (!deleteReview) return;
+      if (!confirm("Are you sure you want to delete this review?")) return;
+      try {
+        await deleteReview(id);
+        await refresh();
+      } catch (err) {
+        alert(err instanceof Error ? err.message : "Failed to delete review.");
         throw err;
       }
     },

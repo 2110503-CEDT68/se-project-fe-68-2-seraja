@@ -214,6 +214,22 @@ export const useBookings = () => {
     }
   };
 
+  const deleteReview = async (bookingId: string) => {
+    setError(null);
+    try {
+      return await apiClient(
+        `/bookings/${bookingId}/review`,
+        { method: "DELETE" },
+        token,
+      );
+    } catch (err) {
+      setError(
+        err instanceof ApiError ? err.message : "Failed to delete review",
+      );
+      throw err;
+    }
+  };
+
   const exportBookingsCsv = async () => {
     try {
       const apiUrl =
@@ -250,6 +266,7 @@ export const useBookings = () => {
     checkOutBooking,
     createReview,
     updateReview,
+    deleteReview,
     exportBookingsCsv,
     loading,
     error,

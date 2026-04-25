@@ -90,8 +90,8 @@ export default function CampgroundDetailPage() {
               onBook={handleBook}
             />
             
-            <ReviewList 
-              reviews={reviews}
+            <ReviewList
+              reviews={paginatedReviews}
               averageRating={averageRating}
               loading={loading && reviews.length === 0}
             />

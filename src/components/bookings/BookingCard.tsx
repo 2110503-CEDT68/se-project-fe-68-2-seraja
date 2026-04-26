@@ -137,6 +137,11 @@ export default function BookingCard({
       return;
     }
     
+    if (!reviewComment.trim()) {
+      setReviewError("Please write a review comment before submitting.");
+      return;
+    }
+    
     if (!onReview) return;
     
     setReviewError("");
@@ -176,7 +181,6 @@ export default function BookingCard({
       setOptDate(new Date().toISOString());
       
       setIsEditingReview(false); 
-
       alert("Your review has been updated");
 
     } catch (err) {
@@ -341,7 +345,7 @@ export default function BookingCard({
               <div className="relative">
                 <textarea
                   className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none text-sm transition-all min-h-[80px] resize-none"
-                  placeholder="Tell us what you liked about your stay... (Optional)"
+                  placeholder="Tell us what you liked about your stay..."
                   value={reviewComment}
                   onChange={(e) => setReviewComment(e.target.value)}
                   disabled={isSubmitting}

@@ -1,3 +1,4 @@
+// campgrounds.ts
 export const mockCampgrounds = [
   {
     _id: "1",

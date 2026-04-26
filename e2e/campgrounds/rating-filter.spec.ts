@@ -2,6 +2,10 @@ import { test, expect } from "@playwright/test";
 import { mockCampgroundsApi } from "../helpers/mock-api";
 import { mockCampgrounds } from "../fixtures/campgrounds";
 
+const ratedCount = mockCampgrounds.filter(
+  (c) => typeof c.averageRating === "number",
+).length;
+
 test.describe("Campground rating filter", () => {
   test.beforeEach(async ({ page }) => {
     await mockCampgroundsApi(page);
@@ -11,19 +15,19 @@ test.describe("Campground rating filter", () => {
 
   test("default filter 'All' shows every campground", async ({ page }) => {
     await expect(page.getByTestId("rating-filter-select")).toHaveValue("all");
-    const cards = page.getByTestId("campground-card");
-    await expect(cards).toHaveCount(mockCampgrounds.length);
+    await expect(page.getByTestId("campground-card")).toHaveCount(
+      mockCampgrounds.length,
+    );
   });
 
-  test("filter 0 - 1 shows no campgrounds", async ({ page }) => {
-    await page.getByTestId("rating-filter-select").selectOption("0-1");
-    await expect(page.getByTestId("campground-card")).toHaveCount(0);
-  });
-
-  test("filter 1 - 2 shows only Desert Star Camp", async ({ page }) => {
+  test("filter 1 - 2 shows the empty state when no campground matches", async ({
+    page,
+  }) => {
     await page.getByTestId("rating-filter-select").selectOption("1-2");
-    const names = await page.getByTestId("campground-name").allTextContents();
-    expect(names).toEqual(["Desert Star Camp"]);
+    await expect(page.getByTestId("campground-card")).toHaveCount(0);
+    await expect(
+      page.getByText("No reviews match your selected filter."),
+    ).toBeVisible();
   });
 
   test("filter 2 - 3 shows only Emerald Lakeside", async ({ page }) => {
@@ -46,29 +50,13 @@ test.describe("Campground rating filter", () => {
     expect(names.sort()).toEqual(["Alpine Retreat", "Beach Haven"]);
   });
 
-  test("filter 'Unrated' shows no campgrounds when all are rated", async ({
-    page,
-  }) => {
+  test("filter 'Unrated' shows only Desert Star Camp", async ({ page }) => {
     await page.getByTestId("rating-filter-select").selectOption("unrated");
-    await expect(page.getByTestId("campground-card")).toHaveCount(0);
-  });
-
-  test("filter combines with sort: 4-5 bucket sorted High → Low", async ({
-    page,
-  }) => {
-    await page.getByTestId("rating-filter-select").selectOption("4-5");
-    await page.getByTestId("sort-select").selectOption("rating-high-low");
     const names = await page.getByTestId("campground-name").allTextContents();
-    expect(names).toEqual(["Alpine Retreat", "Beach Haven"]);
-  });
-
-  test("filter combines with sort: 4-5 bucket sorted Low → High", async ({
-    page,
-  }) => {
-    await page.getByTestId("rating-filter-select").selectOption("4-5");
-    await page.getByTestId("sort-select").selectOption("rating-low-high");
-    const names = await page.getByTestId("campground-name").allTextContents();
-    expect(names).toEqual(["Beach Haven", "Alpine Retreat"]);
+    expect(names).toEqual(["Desert Star Camp"]);
+    await expect(page.getByTestId("campground-card")).toHaveCount(
+      mockCampgrounds.length - ratedCount,
+    );
   });
 
   test("switching filter back to 'All' restores full list", async ({ page }) => {

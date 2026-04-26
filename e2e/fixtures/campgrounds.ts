@@ -62,6 +62,5 @@ export const mockCampgrounds = [
     region: "Northeast",
     capacity: 25,
     owner: "owner5",
-    averageRating: 1.0,
   },
 ];

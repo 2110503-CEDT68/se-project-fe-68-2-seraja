@@ -37,6 +37,7 @@ export default function BookingsPage() {
     checkOutBooking,
     createReview,
     deleteReview,
+    updateReview,
     exportBookingsCsv,
     loading,
     error,
@@ -49,6 +50,7 @@ export default function BookingsPage() {
     checkOutBooking,
     createReview,
     deleteReview,
+    updateReview,
     refresh: getBookings,
   });
   const editModal = useEditBookingModal({
@@ -132,6 +134,7 @@ export default function BookingsPage() {
               onReview={role === "user" ? actions.handleReview : undefined}
               onDeleteReview={role === "user" ? actions.handleDeleteReview : undefined}
               highlightToday={isOwnerOrAdmin}
+              onUpdateReview={role === "user" ? actions.handleUpdateReview : undefined}
             />
 
             <BookingsPagination

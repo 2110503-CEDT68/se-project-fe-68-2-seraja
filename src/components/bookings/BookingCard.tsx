@@ -14,6 +14,7 @@ interface BookingCardProps {
   onCheckOut?: (bookingId: string) => void;
   onReview?: (bookingId: string, rating: number, comment?: string) => Promise<void>;
   onDeleteReview?: (bookingId: string) => Promise<void>;
+  onUpdateReview?: (bookingId: string, rating: number, comment?: string) => Promise<void>;
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -45,6 +46,7 @@ export default function BookingCard({
   onCheckOut,
   onReview,
   onDeleteReview,
+  onUpdateReview,
 }: BookingCardProps) {
   const {
     _id,
@@ -64,15 +66,23 @@ export default function BookingCard({
     review_createdAt
   } = booking;
 
+  // States for Create Review
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState("");
 
+  // States for Optimistic UI
   const [optStatus, setOptStatus] = useState(status);
   const [optRating, setOptRating] = useState(review_rating);
   const [optComment, setOptComment] = useState(review_comment);
   const [optDate, setOptDate] = useState(review_createdAt);
+
+  // States for Edit Review
+  const [isEditingReview, setIsEditingReview] = useState(false);
+  const [editRating, setEditRating] = useState(optRating || 0);
+  const [editComment, setEditComment] = useState(optComment || "");
+  const [updateError, setUpdateError] = useState("");
 
   useEffect(() => {
     setOptStatus(status);
@@ -141,6 +151,32 @@ export default function BookingCard({
       
     } catch (err) {
       setReviewError(err instanceof Error ? err.message : "Failed to post review.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateReview = async () => {
+    if (!editComment.trim()) {
+      setUpdateError("Comment cannot be empty");
+      return;
+    }
+
+    if (!onUpdateReview) return;
+    
+    setUpdateError("");
+    setIsSubmitting(true);
+    try {
+      await onUpdateReview(_id, editRating, editComment);
+      
+      setOptRating(editRating);
+      setOptComment(editComment);
+      setOptDate(new Date().toISOString());
+      
+      // อัปเดตเสร็จให้ปิดโหมดแก้ไขทันทีเลย ไม่ต้องรอเวลาแล้ว
+      setIsEditingReview(false); 
+    } catch (err) {
+      setUpdateError(err instanceof Error ? err.message : "Failed to update review.");
     } finally {
       setIsSubmitting(false);
     }
@@ -272,6 +308,7 @@ export default function BookingCard({
           )}
         </div>
 
+        {/* --- US2-1: CREATE REVIEW --- */}
         {optStatus === "checked-out" && onReview && (
           <div className="mt-4 pt-5 border-t border-gray-100 transition-all duration-300">
             <h3 className="text-base font-bold text-gray-900 mb-3">
@@ -307,7 +344,6 @@ export default function BookingCard({
                 />
               </div>
 
-              {/*Error US2-1 */}
               {reviewError && (
                 <p className="mt-2 text-sm text-red-500 bg-red-50 p-2 rounded-lg border border-red-100 text-center">
                   {reviewError}
@@ -329,66 +365,144 @@ export default function BookingCard({
           </div>
         )}
 
+        {/* --- US2-2: UPDATE/SHOW REVIEW --- */}
         {optStatus === "reviewed" && (
           <div className="mt-4 pt-5 border-t border-gray-100 animate-in fade-in duration-500">
             <h3 className="text-base font-bold text-gray-900 mb-3">
               Your Review
             </h3>
 
-            <div className="bg-gray-50/80 rounded-xl p-4 border border-gray-100">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex gap-1">
+            {isEditingReview ? (
+              // ---------------- Edit Mode (ฟอร์มสำหรับแก้รีวิว) ----------------
+              <div className="bg-white rounded-xl p-4 border border-blue-200 shadow-sm animate-in fade-in">
+                <div className="flex gap-1 mb-4">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <span
+                    <button
                       key={star}
-                      className={`text-lg ${
-                        star <= (optRating || 0) 
-                          ? "text-yellow-400"
-                          : "text-gray-200"
+                      type="button"
+                      onClick={() => { setEditRating(star); setUpdateError(""); }}
+                      disabled={isSubmitting}
+                      className={`text-2xl transition-colors focus:outline-none ${
+                        star <= editRating
+                          ? "text-yellow-400 drop-shadow-sm"
+                          : "text-gray-200 hover:text-gray-300"
                       }`}
                     >
                       ★
-                    </span>
+                    </button>
                   ))}
                 </div>
-                {optDate && (
-                  <span className="text-xs text-gray-500 font-medium">
-                    {formatDate(optDate)}
-                  </span>
+
+                <textarea
+                  className="w-full px-3 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-blue-500 outline-none text-sm transition-all min-h-[80px] resize-none"
+                  value={editComment}
+                  onChange={(e) => setEditComment(e.target.value)}
+                  disabled={isSubmitting}
+                />
+
+                {updateError && (
+                  <div className="mt-2 text-sm text-red-500">
+                    {updateError}
+                  </div>
                 )}
-              </div>
 
-              {optComment && ( 
-                <p className="text-sm text-gray-700 italic">
-                  &quot;{optComment}&quot;
-                </p>
-              )}
-
-              {onDeleteReview && (
-                <div className="mt-3 flex justify-end">
+                <div className="mt-4 flex justify-end gap-2">
                   <Button
-                    variant="danger"
+                    variant="outline"
                     size="sm"
-                    onClick={async () => {
-                      const confirmed = confirm("Are you sure you want to delete this review?");
-                      if (!confirmed) return;
-
-                      await onDeleteReview(_id);
-
-                      setOptStatus("checked-out");
-                      setOptRating(null);
-                      setOptComment(null);
-                      setOptDate(undefined);
-                      setReviewRating(0);
-                      setReviewComment("");
-                      setReviewError("");
-                    }}
+                    onClick={() => setIsEditingReview(false)}
+                    disabled={isSubmitting}
                   >
-                    Delete Review
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleUpdateReview}
+                    loading={isSubmitting}
+                    disabled={isSubmitting}
+                    className="px-6"
+                  >
+                    Update
                   </Button>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              // ---------------- Show Review Mode ----------------
+              <div className="bg-gray-50/80 rounded-xl p-5 border border-gray-100 animate-in fade-in">
+                
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span
+                        key={star}
+                        className={`text-xl ${
+                          star <= (optRating || 0) 
+                            ? "text-yellow-400"
+                            : "text-gray-200"
+                        }`}
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </div>
+
+                  {optDate && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-500">
+                        {formatDate(optDate)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                {optComment && ( 
+                  <p className="text-[15px] text-gray-700 italic">
+                    &quot;{optComment}&quot;
+                  </p>
+                )}
+
+                {(onUpdateReview || onDeleteReview) && (
+                  <div className="mt-5 flex justify-end gap-2">
+                    {onUpdateReview && (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => {
+                          setEditRating(optRating || 0);
+                          setEditComment(optComment || "");
+                          setIsEditingReview(true);
+                        }}
+                      >
+                        Edit Review
+                      </Button>
+                    )}
+                    
+                    {onDeleteReview && (
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={async () => {
+                          const confirmed = confirm("Are you sure you want to delete this review?");
+                          if (!confirmed) return;
+
+                          await onDeleteReview(_id);
+
+                          setOptStatus("checked-out");
+                          setOptRating(null as any);
+                          setOptComment(null as any);
+                          setOptDate(undefined);
+                          setReviewRating(0);
+                          setReviewComment("");
+                          setReviewError("");
+                        }}
+                      >
+                        Delete Review
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 

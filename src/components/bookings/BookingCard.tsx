@@ -22,7 +22,7 @@ const STATUS_STYLES: Record<string, string> = {
   "checked-in": "bg-green-100 text-green-700",
   "checked-out": "bg-gray-200 text-gray-500",
   cancelled: "bg-red-100 text-red-600",
-  reviewed: "bg-purple-100 text-purple-700",
+  reviewed: "bg-gray-200 text-gray-500", 
   "can-not-review": "bg-gray-300 text-gray-600",
   "late-checkout": "bg-orange-100 text-orange-700 border border-orange-300 font-bold animate-pulse",
 };
@@ -32,7 +32,7 @@ const STATUS_LABELS: Record<string, string> = {
   "checked-in": "Checked In",
   "checked-out": "Checked Out",
   cancelled: "Cancelled",
-  reviewed: "Reviewed",
+  reviewed: "Checked Out", 
   "can-not-review": "Review Blocked",
   "late-checkout": "Late Checked Out",
 };
@@ -149,6 +149,8 @@ export default function BookingCard({
       setOptComment(reviewComment);
       setOptDate(new Date().toISOString());
       
+      alert("Thank you for your review!");
+      
     } catch (err) {
       setReviewError(err instanceof Error ? err.message : "Failed to post review.");
     } finally {
@@ -173,8 +175,10 @@ export default function BookingCard({
       setOptComment(editComment);
       setOptDate(new Date().toISOString());
       
-      // อัปเดตเสร็จให้ปิดโหมดแก้ไขทันทีเลย ไม่ต้องรอเวลาแล้ว
       setIsEditingReview(false); 
+
+      alert("Your review has been updated");
+
     } catch (err) {
       setUpdateError(err instanceof Error ? err.message : "Failed to update review.");
     } finally {
@@ -373,7 +377,7 @@ export default function BookingCard({
             </h3>
 
             {isEditingReview ? (
-              // ---------------- Edit Mode (ฟอร์มสำหรับแก้รีวิว) ----------------
+              // ---------------- Edit Mode ----------------
               <div className="bg-white rounded-xl p-4 border border-blue-200 shadow-sm animate-in fade-in">
                 <div className="flex gap-1 mb-4">
                   {[1, 2, 3, 4, 5].map((star) => (

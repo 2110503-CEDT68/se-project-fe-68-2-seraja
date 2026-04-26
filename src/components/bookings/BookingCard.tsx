@@ -370,7 +370,11 @@ export default function BookingCard({
                     variant="danger"
                     size="sm"
                     onClick={async () => {
+                      const confirmed = confirm("Are you sure you want to delete this review?");
+                      if (!confirmed) return;
+
                       await onDeleteReview(_id);
+
                       setOptStatus("checked-out");
                       setOptRating(null);
                       setOptComment(null);

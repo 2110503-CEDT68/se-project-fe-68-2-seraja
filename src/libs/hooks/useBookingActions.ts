@@ -60,7 +60,6 @@ export function useBookingActions({
     },
     handleDeleteReview: async (id: string) => {
       if (!deleteReview) return;
-      if (!confirm("Are you sure you want to delete this review?")) return;
       try {
         await deleteReview(id);
         await refresh();

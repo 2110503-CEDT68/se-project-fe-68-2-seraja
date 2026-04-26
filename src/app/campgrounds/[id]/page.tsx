@@ -21,27 +21,28 @@ export default function CampgroundDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user, logout, isAdmin } = useAuth();
-  const { 
-    singleCampground, 
-    getCampgroundById, 
+
+  const {
+    singleCampground,
+    getCampgroundById,
     reviews,
     averageRating,
     getCampgroundReviews,
-    loading, 
-    error 
+    loading,
+    error,
   } = useCampgrounds();
+
   const {
     createBooking,
     loading: bookingLoading,
     error: bookingError,
   } = useBookings();
-  const bookingModal = useBookingModal({ createBooking });
 
+  const bookingModal = useBookingModal({ createBooking });
   const campgroundId = params?.id as string;
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Reset to page 1 whenever the reviews array changes (e.g. new campground)
   useEffect(() => {
     setCurrentPage(1);
   }, [reviews]);
@@ -65,7 +66,21 @@ export default function CampgroundDetailPage() {
       router.push("/login");
       return;
     }
+
     bookingModal.open();
+  };
+
+  const handleDeleteReview = async (bookingId: string) => {
+    if (!user) return;
+
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings/${bookingId}/review`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+    });
+
+    getCampgroundReviews(campgroundId);
   };
 
   return (
@@ -89,20 +104,21 @@ export default function CampgroundDetailPage() {
               onBack={() => router.back()}
               onBook={handleBook}
             />
-            
+
             <ReviewList
               reviews={paginatedReviews}
               averageRating={averageRating}
               loading={loading && reviews.length === 0}
+              isAdmin={isAdmin}
+              onDeleteReview={handleDeleteReview}
             />
+
             {!loading && totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-6 mb-10">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 rounded-md border text-sm font-medium
-                             disabled:opacity-40 disabled:cursor-not-allowed
-                             hover:bg-gray-100 transition-colors"
+                  className="px-3 py-1.5 rounded-md border text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
                 >
                   ← Prev
                 </button>
@@ -111,12 +127,11 @@ export default function CampgroundDetailPage() {
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors
-                      ${
-                        page === currentPage
-                          ? "bg-green-600 text-white border-green-600"
-                          : "hover:bg-gray-100"
-                      }`}
+                    className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
+                      page === currentPage
+                        ? "bg-green-600 text-white border-green-600"
+                        : "hover:bg-gray-100"
+                    }`}
                   >
                     {page}
                   </button>
@@ -125,9 +140,7 @@ export default function CampgroundDetailPage() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 rounded-md border text-sm font-medium
-                             disabled:opacity-40 disabled:cursor-not-allowed
-                             hover:bg-gray-100 transition-colors"
+                  className="px-3 py-1.5 rounded-md border text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
                 >
                   Next →
                 </button>

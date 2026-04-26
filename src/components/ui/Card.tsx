@@ -2,7 +2,7 @@
 
 import React from "react"
 
-interface CardProps {
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode
   className?: string
   hoverable?: boolean
@@ -14,6 +14,7 @@ export default function Card({
   className,
   hoverable = false,
   onClick,
+  ...rest
 }: CardProps) {
   const classes = [
     "bg-white rounded-2xl shadow-md border border-gray-100",
@@ -24,7 +25,7 @@ export default function Card({
   ].filter(Boolean).join(" ")
 
   return (
-    <div onClick={onClick} className={classes}>
+    <div onClick={onClick} className={classes} {...rest}>
       {children}
     </div>
   )

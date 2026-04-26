@@ -23,6 +23,7 @@ export default function CampgroundsHeader({
       <div className="flex items-center gap-2">
         <label className="text-sm font-medium text-gray-600">Sort by:</label>
         <select
+          data-testid="sort-select"
           value={sort}
           onChange={(e) => onSortChange(e.target.value as SortOption)}
           className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"

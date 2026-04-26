@@ -121,4 +121,28 @@ test.describe("Campground Review Process", () => {
     // And I should see an error message in the page
     await expect(page.getByText("Please select a star rating before submitting.")).toBeVisible();
   });
+
+  test("should show error when submitting without a text comment", async ({ page }) => {
+    // Given I am on the bookings page
+    await page.goto("/bookings");
+
+    const reviewSection = page.locator('div:has-text("Write a Review")').first();
+    await expect(reviewSection).toBeVisible();
+
+    // When I select a star rating
+    const stars = reviewSection.locator('button').filter({ hasText: "★" });
+    await stars.nth(3).click();
+
+    // And I leave the text comment empty
+    const commentBox = reviewSection.locator('textarea');
+    await commentBox.fill("");
+
+    // And I click the "Submit" button
+    const submitButton = reviewSection.getByRole("button", { name: "Submit" });
+    await submitButton.click();
+
+    // Then the review should not be submitted
+    // And I should see an error message saying "Comment cannot be empty."
+    await expect(page.getByText("Please write a review comment before submitting.")).toBeVisible();
+  });
 });

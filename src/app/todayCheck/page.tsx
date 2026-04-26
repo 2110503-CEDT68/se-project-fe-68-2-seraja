@@ -90,7 +90,7 @@ export default function TodayCheckPage() {
 
   const allCheckedOutToday = useMemo(() => {
     return bookings.filter((b) => {
-      if (b.status !== "checked-out") return false;
+      if (b.status !== "checked-out" && b.status !== "reviewed") return false;
       if (b.actualCheckOut) {
         const actualDate = new Date(b.actualCheckOut).toISOString().split("T")[0];
         return actualDate === todayStr;

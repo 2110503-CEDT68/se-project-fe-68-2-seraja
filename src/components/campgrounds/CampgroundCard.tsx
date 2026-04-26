@@ -40,7 +40,7 @@ export default function CampgroundCard({
   ];
 
   return (
-    <Card hoverable className="overflow-hidden flex flex-col h-full">
+    <Card hoverable className="overflow-hidden flex flex-col h-full" data-testid="campground-card">
       <div
         style={{
           position: "relative",
@@ -89,7 +89,7 @@ export default function CampgroundCard({
 
       <div className="flex flex-col flex-grow gap-3 p-5">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 line-clamp-1">
+          <h2 className="text-xl font-semibold text-gray-900 line-clamp-1" data-testid="campground-name">
             {name}
           </h2>
           <div className="mt-2 flex items-center justify-between gap-2">

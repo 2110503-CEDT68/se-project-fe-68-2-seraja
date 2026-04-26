@@ -14,6 +14,7 @@ export default function CampgroundsGrid({
 }: CampgroundsGridProps) {
   return (
     <div
+      data-testid="campgrounds-grid"
       style={{
         display: "grid",
         gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",

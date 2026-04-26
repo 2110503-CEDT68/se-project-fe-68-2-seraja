@@ -149,6 +149,8 @@ export default function BookingCard({
       setOptComment(reviewComment);
       setOptDate(new Date().toISOString());
       
+      alert("Thank you for your review!");
+      
     } catch (err) {
       setReviewError(err instanceof Error ? err.message : "Failed to post review.");
     } finally {
@@ -174,6 +176,9 @@ export default function BookingCard({
       setOptDate(new Date().toISOString());
       
       setIsEditingReview(false); 
+
+      alert("Your review has been updated");
+
     } catch (err) {
       setUpdateError(err instanceof Error ? err.message : "Failed to update review.");
     } finally {
@@ -372,7 +377,7 @@ export default function BookingCard({
             </h3>
 
             {isEditingReview ? (
-              // ---------------- Edit Mode (ฟอร์มสำหรับแก้รีวิว) ----------------
+              // ---------------- Edit Mode ----------------
               <div className="bg-white rounded-xl p-4 border border-blue-200 shadow-sm animate-in fade-in">
                 <div className="flex gap-1 mb-4">
                   {[1, 2, 3, 4, 5].map((star) => (

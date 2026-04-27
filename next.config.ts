@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "cedt-be-for-fe-proj.vercel.app" },

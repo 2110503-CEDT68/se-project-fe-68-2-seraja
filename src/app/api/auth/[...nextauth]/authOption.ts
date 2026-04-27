@@ -1,7 +1,13 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://cedt-be-for-fe-proj.vercel.app/api/v1";
+// authorize() runs server-side. In Docker, NEXT_PUBLIC_API_URL points at
+// http://localhost:5000 for the browser, which is unreachable from inside the
+// frontend container — so prefer INTERNAL_API_URL when set.
+const API_URL =
+  process.env.INTERNAL_API_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://cedt-be-for-fe-proj.vercel.app/api/v1";
 
 export const authOptions: NextAuthOptions = {
   providers: [

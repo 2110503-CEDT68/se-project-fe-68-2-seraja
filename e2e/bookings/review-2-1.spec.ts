@@ -74,7 +74,6 @@ test.describe("Campground Review Process", () => {
     await expect(reviewSection).toBeVisible();
 
     // When I select a star rating (e.g., 4 stars)
-    // Buttons are in a flex gap-1 mb-4. 4th star is index 3.
     const stars = reviewSection.locator('button').filter({ hasText: "★" });
     await stars.nth(3).click(); // Click 4th star
 
@@ -82,44 +81,68 @@ test.describe("Campground Review Process", () => {
     const commentBox = reviewSection.locator('textarea');
     await commentBox.fill("Great views and clean showers!");
 
+    // เตรียมดักจับ Alert ที่จะเด้งขึ้นมาหลังจากกด Submit
+    const dialogPromise = page.waitForEvent('dialog');
+
     // And I click the "Submit" button
     const submitButton = reviewSection.getByRole("button", { name: "Submit" });
-    
-    // ตั้งดัก alert หรือข้อความความสำเร็จ (ขึ้นอยู่กับว่าระบบแจ้งเตือนอย่างไร)
-    // ในโค้ดปัจจุบัน handlePostReview จะเปลี่ยน UI เป็นสถานะ 'reviewed'
     await submitButton.click();
+
+    // รอให้ Alert ปรากฏและตรวจสอบข้อความ
+    const dialog = await dialogPromise;
+    expect(dialog.message()).toBe('Thank you for your review!');
+    await dialog.accept(); // กด OK ที่ Alert
 
     // Then my review should be saved to the database (Verified via Mock API above)
 
-    // And I should see success feedback
-    // ในระบบปัจจุบัน เมื่อรีวิวเสร็จ ฟอร์มจะหายไปและแสดง "Your Review" หรือคะแนนที่รีวิว
-    // เราจะใช้ Mock API fulfill message ให้แสดงผล (ถ้าโค้ดมีการเรียกใช้)
-    // หรือเช็คความถูกต้องของ UI ที่เปลี่ยนไป
+    // And I should see success feedback (UI transition to "Your Review")
     await expect(page.locator('h3:has-text("Your Review")')).toBeVisible();
     await expect(page.getByText("Great views and clean showers!")).toBeVisible();
   });
 
-  test("should show error when submitting without a star rating", async ({ page }) => {
+  test("should show error message when submitting without a star rating", async ({ page }) => {
     // Given I am on the bookings page
     await page.goto("/bookings");
 
-    // Check if the "Write a Review" section is visible for the checked-out booking
     const reviewSection = page.locator('div:has-text("Write a Review")').first();
     await expect(reviewSection).toBeVisible();
 
-    // When I leave the star rating unselected (do nothing)
+    // When I leave the star rating unselected
 
     // And I enter a text comment
     const commentBox = reviewSection.locator('textarea');
-    await commentBox.fill("This is a test comment without rating.");
+    await commentBox.fill("Testing missing rating.");
 
     // And I click the "Submit" button
     const submitButton = reviewSection.getByRole("button", { name: "Submit" });
     await submitButton.click();
 
-    // Then the review should not be submitted (Verified because we didn't call the API or change state)
-
-    // And I should see an error message saying "Please select a star rating before submitting."
+    // Then the review should not be submitted
+    // And I should see an error message in the page
     await expect(page.getByText("Please select a star rating before submitting.")).toBeVisible();
+  });
+
+  test("should show error when submitting without a text comment", async ({ page }) => {
+    // Given I am on the bookings page
+    await page.goto("/bookings");
+
+    const reviewSection = page.locator('div:has-text("Write a Review")').first();
+    await expect(reviewSection).toBeVisible();
+
+    // When I select a star rating
+    const stars = reviewSection.locator('button').filter({ hasText: "★" });
+    await stars.nth(3).click();
+
+    // And I leave the text comment empty
+    const commentBox = reviewSection.locator('textarea');
+    await commentBox.fill("");
+
+    // And I click the "Submit" button
+    const submitButton = reviewSection.getByRole("button", { name: "Submit" });
+    await submitButton.click();
+
+    // Then the review should not be submitted
+    // And I should see an error message saying "Comment cannot be empty."
+    await expect(page.getByText("Please write a review comment before submitting.")).toBeVisible();
   });
 });

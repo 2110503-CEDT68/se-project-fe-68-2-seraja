@@ -29,7 +29,8 @@ export function filterCampgroundsByRating(
       typeof c.averageRating === "number" && !Number.isNaN(c.averageRating);
     if (!hasRating) return false;
     const r = c.averageRating as number;
-    return filter === "4-5" ? r >= lo && r <= hi : r >= lo && r < hi;
+    // return filter === "4-5" ? r >= lo && r <= hi : r >= lo && r < hi;
+    return r >= lo && r <= hi; // include upper bound for all ranges to avoid gaps between them
   });
 }
 
